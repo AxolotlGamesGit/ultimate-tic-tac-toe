@@ -68,7 +68,7 @@ public class SmallBoard {
       Board[_row][_col] = Player.NONE;
     }
     else {
-      throw new IllegalArgumentException("Can't undo: no player on that square");
+      throw new IllegalArgumentException("Can't undo: no player on that square " + _row + " " + _col);
     }
   }
   

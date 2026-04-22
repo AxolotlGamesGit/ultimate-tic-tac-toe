@@ -4,7 +4,7 @@ import main.SmallBoard.Player;
 
 public class BigBoard {
   public SmallBoard[][] Board;
-  public SmallBoard.Player Turn;
+  public Player Turn;
   public SmallBoard Wins;
   public int BigRow;
   public int BigCol;
@@ -22,7 +22,7 @@ public class BigBoard {
     BigCol = -1;
   }
   
-  public BigBoard(SmallBoard[][] _board, SmallBoard.Player _turn, int _bigRow, int _bigCol) {
+  public BigBoard(SmallBoard[][] _board, Player _turn, int _bigRow, int _bigCol) {
     Board = _board;
     Turn = _turn;
     BigRow = _bigRow;

@@ -146,7 +146,7 @@ public class BigBoard {
                   break;
                 case NONE:
                   if ((_bigRow == BigRow  &&  _bigCol == BigCol)  ||  (BigRow == -1)) {
-                    System.out.print("~");
+                    System.out.print("#");
                   }
                   else {
                     System.out.print("-");

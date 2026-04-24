@@ -1,10 +1,11 @@
 package main;
 
 import java.util.Stack;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import main.SmallBoard.Player;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Node {
   private BigBoard state;
@@ -85,10 +86,10 @@ public class Node {
         _squareValue -= _currentBoard.getWinningSquareCount(SmallBoard.opposite(_player)) * 3;
 
         if (_bigRow == 1  &&  _bigCol == 1) {
-          _squareMult = 1.4;
+          _squareMult = 1.5;
         }
         if (Math.max(_bigRow, _bigCol) == 2  &&  Math.min(_bigRow, _bigCol) == 0) {
-          _squareMult = 1.2;
+          _squareMult = 1.25;
         }
         if (state.Wins.wouldWin(_bigRow, _bigCol, _player)) {
           _squareMult *= 2;
@@ -127,11 +128,15 @@ public class Node {
   }
 
   public double minimax(int _depth, boolean _isMaximizing, double _alpha, double _beta, Player _player) {
-    if (_depth == 1  ||  state.isFinished()) {
+    Debug.getInstance().MinimaxCount++;
+    if (_depth <= 1  ||  state.isFinished()) {
+      Debug.getInstance().EvalCount++;
       return eval(false, _player);
     }
     if (children.empty()) {
       explore(false);
+      Debug.getInstance().NodeCount++;
+      Debug.getInstance().ChildCount += children.size();
     }
     if (_isMaximizing) {
       double _maxEval = Double.NEGATIVE_INFINITY;
@@ -178,8 +183,8 @@ public class Node {
     while(!children.empty()) {
       boolean _moveAnywhere = state.BigRow == -1;
       state.move1d(bigSquares.peek(), smallSquares.peek());
-      double _eval = children.pop().minimax(_depth, false, _bestMoveEval, Double.POSITIVE_INFINITY, _player);
-      System.out.println(bigSquares.peek() + " " + smallSquares.peek() + " " + _eval);
+      double _eval = children.pop().minimax(_depth, false, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, _player);
+      // System.out.println(bigSquares.peek() + " " + smallSquares.peek() + " " + _eval);
       state.undo1d(bigSquares.peek(), smallSquares.peek(), _moveAnywhere);
       if (_eval > _bestMoveEval) {
         _bestMoveBigSquare = bigSquares.peek();

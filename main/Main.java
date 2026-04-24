@@ -1,6 +1,7 @@
 package main;
 
 import java.util.Scanner;
+import java.util.Stack;
 
 import main.SmallBoard.Player;
 
@@ -11,23 +12,39 @@ public class Main {
     BigBoard board = new BigBoard();
     board.print();
 
-		int bigSquare = -1;
-		int smallSquare = -1;
-		boolean moveAnywhere = true;
+		Stack<Integer> bigSquares = new Stack<Integer>();
+		Stack<Integer> smallSquares = new Stack<Integer>();
+		Stack<Boolean> moveAnywhere = new Stack<Boolean>();
 		String token = "";
+		int xDepth = -1;
+		int oDepth = 8;
 		while (!checkToken(token, "close")) {
-			token = scanner.nextLine().trim().toLowerCase();
-		// 	token = "move";
+		  int _depth = 8;
+		  if ((board.Turn == Player.X  &&  xDepth == -1)  ||  
+		          (board.Turn == Player.O  &&  oDepth == -1)  ||
+		          (board.Turn == Player.NONE)) {
+			  token = scanner.nextLine().trim().toLowerCase();
+		  }
+		  else {
+			  token = "move";
+			  if (board.Turn == Player.X) {
+			    _depth = xDepth;
+			  }
+			  else {
+			    _depth = oDepth;
+			  }
+		  }
+		  
 		  if (checkToken(token, "undo")) {
-		    if (bigSquare == -1) {
-		      System.out.println("Can't undo (max 1 turn undo)");
+		    if (!bigSquares.empty()) {
+    	    board.undo1d(bigSquares.pop(), smallSquares.pop(), moveAnywhere.pop());
+    	    if (_depth != 1  &&  !bigSquares.empty()) {
+		        board.undo1d(bigSquares.pop(), smallSquares.pop(), moveAnywhere.pop());
+    	    }
+          board.print();
 		    }
 		    else {
-		      board.undo1d(bigSquare, smallSquare, moveAnywhere);
-		      bigSquare = -1;
-          smallSquare = -1;
-          moveAnywhere = true;
-          board.print();
+		      System.out.println("Can't undo");
 		    }
 		    continue;
 		  }
@@ -79,7 +96,6 @@ public class Main {
 		  
 		  if (checkToken(token, "move")) {
 		    Node _node = new Node(BigBoard.copy(board));
-				int _depth = 10;
 				switch (token) {
 					case "move-small":
 						_depth -= 1;
@@ -88,7 +104,7 @@ public class Main {
 						_depth -= 2;
 						break;
 					case "move-tiny":
-						_depth -= 6;
+						_depth -= 5;
 						break;
 					case "move-big":
 						_depth+= 1;
@@ -100,28 +116,37 @@ public class Main {
 						_depth += 5;
 						break;
 				}
+				System.out.println("Thinking (depth " + _depth + ")");
+        Debug.getInstance().resetStats();
 				int[] _bestMove = _node.getBestMove(_depth);
+        Debug _debug = Debug.getInstance();
+        System.out.println("Eval calls: " + _debug.EvalCount);
+        System.out.println("Minimax calls: " + _debug.MinimaxCount);
+        System.out.println("Average # of children: " + (double)_debug.ChildCount / (double)_debug.NodeCount);
+				bigSquares.push(_bestMove[0]);
+				smallSquares.push(_bestMove[1]);
+				moveAnywhere.push(board.BigRow == -1);
 				board.move1d(_bestMove[0],_bestMove[1]);
 				board.print();
-		    continue;
+				continue;
 		  }
 		  
 		  try {
   		  if (token.length() >= 4  &&  token.charAt(2) == '-') {
-  		    bigSquare = getSquare(token.substring(0,2));
-  		    smallSquare = getSquare(token.substring(3,token.length()));
+  		    bigSquares.push(getSquare(token.substring(0,2)));
+  		    smallSquares.push(getSquare(token.substring(3,token.length())));
   		  }
   		  else if (token.length() >= 3  &&  token.charAt(1) == '-') {
-  		    bigSquare = getSquare(token.substring(0,1));
-  		    smallSquare = getSquare(token.substring(2,token.length()));
+  		    bigSquares.push(getSquare(token.substring(0,1)));
+  		    smallSquares.push(getSquare(token.substring(2,token.length())));
   		  }
   		  else if (token.length() == 2) {
-  		    bigSquare = -1;
-  		    smallSquare = getSquare(token.substring(0,2));
+  		    bigSquares.push(-1);
+  		    smallSquares.push(getSquare(token.substring(0,2)));
   		  }
   		  else if (token.length() == 1) {
-  		    bigSquare = -1;
-  		    smallSquare = getSquare(token.substring(0,1));
+  		    bigSquares.push(-1);
+  		    smallSquares.push(getSquare(token.substring(0,1)));
   		  }
   		  else {
   		    System.out.println("Invalid input (check notation)");
@@ -135,10 +160,11 @@ public class Main {
 		  
 		  boolean _tempMoveAnywhere = board.BigRow == -1;
 		  try {
-  		  if (bigSquare == -1) {
-  		    bigSquare = board.BigRow*3 + board.BigCol;
+  		  if (bigSquares.peek() == -1) {
+  		    bigSquares.pop();
+  		    bigSquares.push(board.BigRow*3 + board.BigCol);
   		  }
-  		  board.move1d(bigSquare, smallSquare);
+  		  board.move1d(bigSquares.peek(), smallSquares.peek());
 		  }
 		  catch (Exception e) {
 		    System.out.println("Illegal move");
@@ -147,7 +173,7 @@ public class Main {
 		  }
 		  
 		  board.print();
-		  moveAnywhere = _tempMoveAnywhere;
+		  moveAnywhere.push(_tempMoveAnywhere);
 		}
 
 		scanner.close();
@@ -177,6 +203,7 @@ public class Main {
 	  throw new IllegalArgumentException("not a valid square");
 	}
 
+	@SuppressWarnings("unused")
 	private static int getRow(String _square) {
 	  switch(_square.trim().toLowerCase()) {
 	    case "n", "ne", "nw":
@@ -189,6 +216,7 @@ public class Main {
 	  throw new IllegalArgumentException("not a valid square");
 	}
 	
+	@SuppressWarnings("unused")
 	private static int getCol(String _square) {
 	  switch(_square.trim().toLowerCase()) {
 	    case "w", "nw", "sw":

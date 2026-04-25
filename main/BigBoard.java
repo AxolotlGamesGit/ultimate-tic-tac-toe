@@ -69,7 +69,7 @@ public class BigBoard {
       BigRow = -1;
       BigCol = -1;
     }
-    if (Wins.isFinished()) {
+    if (isFinished()) {
       Turn = Player.NONE;
     }
     if (Turn == Player.X) {
@@ -214,7 +214,7 @@ public class BigBoard {
         System.out.println("-----------------------");
       }
     }
-    if (Wins.isFinished()) {
+    if (isFinished()) {
       switch (Wins.getWinner()) {
         case X:
           System.out.println("X WINS!");

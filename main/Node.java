@@ -49,7 +49,7 @@ public class Node {
   }
 
   public double eval(boolean _print, Player _player) {
-    if (state.Wins.isFinished()) {
+    if (state.isFinished()) {
       Player _winner = state.Wins.getWinner();
       if (_winner == _player) {
         return 1000000.;

@@ -5,6 +5,7 @@ public class Debug {
   public int MinimaxCount = 0;
   public int NodeCount = 0;
   public int ChildCount = 0;
+  public long StartTime = 0; 
   
   private static Debug instance;
   
@@ -24,5 +25,6 @@ public class Debug {
     instance.MinimaxCount = 0;
     instance.NodeCount = 0;
     instance.ChildCount = 0;
+    StartTime = System.nanoTime();
   }
 }

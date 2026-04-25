@@ -9,6 +9,7 @@ import main.SmallBoard.Player;
 public class Main {
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
+		Debug.getInstance().resetStats();
 
     BigBoard board = new BigBoard();
     board.print();
@@ -17,13 +18,14 @@ public class Main {
 		Stack<Integer> smallSquares = new Stack<Integer>();
 		Stack<Boolean> moveAnywhere = new Stack<Boolean>();
 		String token = "";
-		int xDepth = 5;
-		int oDepth = 5;
+		int xDepth = 6;
+		int oDepth = 7;
 		while (!checkToken(token, "close")) {
 		  int _depth = 8;
 		  if ((board.Turn == Player.X  &&  xDepth == -1)  ||  
 		          (board.Turn == Player.O  &&  oDepth == -1)  ||
-		          (board.Turn == Player.NONE)) {
+		          (board.Turn == Player.NONE)  ||
+							(board.isFinished())) {
 			  token = scanner.nextLine().trim().toLowerCase();
 		  }
 		  else {
@@ -100,14 +102,7 @@ public class Main {
 		    continue;
 		  }
 		  
-			if (checkToken(token, "stats")) {
-				Debug _debug = Debug.getInstance();
-				System.out.println("Eval calls: " + _debug.EvalCount);
-        System.out.println("Minimax calls: " + _debug.MinimaxCount);
-        System.out.println("Average # of children: " + (double)_debug.ChildCount / (double)_debug.NodeCount);
-			}
-
-		  if (checkToken(token, "move")) {
+			if (checkToken(token, "move")) {
 		    Node _node = new Node(BigBoard.copy(board));
 				switch (token) {
 					case "move-small":
@@ -141,8 +136,21 @@ public class Main {
 				moveAnywhere.push(board.BigRow == -1);
 				board.move1d(_bestMove[0],_bestMove[1]);
 				board.print();
-				continue;
+				if (board.isFinished()) {
+					token = "stats";
+				}
+				else {
+					continue;
+				}
 		  }
+			
+			if (checkToken(token, "stats")) {
+				Debug _debug = Debug.getInstance();
+				System.out.println("Eval calls: " + _debug.EvalCount);
+        System.out.println("Minimax calls: " + _debug.MinimaxCount);
+        System.out.println("Average # of children: " + (double)_debug.ChildCount / (double)_debug.NodeCount);
+				System.out.println("Time: " + ((double)(System.nanoTime() - _debug.StartTime)) / 1000000000.);
+			}
 		  
 		  try {
   		  if (token.length() >= 4  &&  token.charAt(2) == '-') {

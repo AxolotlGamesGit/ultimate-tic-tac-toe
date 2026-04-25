@@ -20,12 +20,13 @@ public class Node {
     children = new Stack<Node>();
   }
   
-  public void explore(boolean _print) {
+  public void explore(Player _player, boolean _print) {
     if (state.BigRow == -1) {
       for (int _row = 0; _row < 3; _row++) {
         for (int _col = 0; _col < 3; _col++) {
-          if (!state.Board[_row][_col].isFinished()) {
-            ArrayList<Integer> _moves = getMoves(state.Board[_row][_col]);
+          SmallBoard _currentBoard = state.Board[_row][_col];
+          if (!_currentBoard.isFinished()) {
+            ArrayList<Integer> _moves = _currentBoard.getOrderedMoves(_player);
             smallSquares.addAll(_moves);
             bigSquares.addAll(Collections.nCopies(_moves.size(), _row*3+_col));
           }
@@ -33,7 +34,7 @@ public class Node {
       }
     }
     else {
-      ArrayList<Integer> _moves = getMoves(state.Board[state.BigRow][state.BigCol]);
+      ArrayList<Integer> _moves = state.Board[state.BigRow][state.BigCol].getOrderedMoves(_player);
       smallSquares.addAll(_moves);
       bigSquares.addAll(Collections.nCopies(_moves.size(), state.BigRow*3+state.BigCol));
     }
@@ -45,19 +46,6 @@ public class Node {
     // System.out.println(children.size());
     // System.out.println(bigSquares.size());
     // System.out.println(smallSquares.size());
-  }
-
-  private ArrayList<Integer> getMoves(SmallBoard _board) {
-    ArrayList<Integer> _result = new ArrayList<Integer>();
-    for (int _row = 0; _row < 3; _row++) {
-      for (int _col = 0; _col < 3; _col++) {
-        if (_board.Board[_row][_col] == Player.NONE) {
-          _result.add(_row*3 + _col);
-        }
-      }
-    }
-    
-    return _result;
   }
 
   public double eval(boolean _print, Player _player) {
@@ -134,7 +122,7 @@ public class Node {
       return eval(false, _player);
     }
     if (children.empty()) {
-      explore(false);
+      explore(_player, false);
       Debug.getInstance().NodeCount++;
       Debug.getInstance().ChildCount += children.size();
     }
@@ -174,7 +162,7 @@ public class Node {
 
   public int[] getBestMove(int _depth) {
     if (children.empty()) {
-      explore(false);
+      explore(state.Turn, false);
     }
     int _bestMoveBigSquare = -1;
     int _bestMoveSmallSquare = -1;

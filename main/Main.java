@@ -1,5 +1,6 @@
 package main;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -16,8 +17,8 @@ public class Main {
 		Stack<Integer> smallSquares = new Stack<Integer>();
 		Stack<Boolean> moveAnywhere = new Stack<Boolean>();
 		String token = "";
-		int xDepth = -1;
-		int oDepth = 8;
+		int xDepth = 5;
+		int oDepth = 5;
 		while (!checkToken(token, "close")) {
 		  int _depth = 8;
 		  if ((board.Turn == Player.X  &&  xDepth == -1)  ||  
@@ -83,17 +84,29 @@ public class Main {
 
 			if (checkToken(token, "minimax")) {
 		    Node _node = new Node(BigBoard.copy(board));
-				System.out.println(_node.minimax(2,true,-1000000,100000,board.Turn));
+				System.out.println(_node.minimax(_depth,true,-1000000,100000,board.Turn));
 				board.print();
 		    continue;
 		  }
 
 			if (checkToken(token, "moves")) {
-		    Node _node = new Node(BigBoard.copy(board));
-				_node.explore(true);
+		    // Node _node = new Node(BigBoard.copy(board));
+				// _node.explore(board.Turn,true);
+				ArrayList<Integer> _moves = board.Board[board.BigRow][board.BigCol].getOrderedMoves(board.Turn);
+				for (int i = 0; i < _moves.size(); i++) {
+					System.out.println(_moves.get(i));
+				}
+				board.print();
 		    continue;
 		  }
 		  
+			if (checkToken(token, "stats")) {
+				Debug _debug = Debug.getInstance();
+				System.out.println("Eval calls: " + _debug.EvalCount);
+        System.out.println("Minimax calls: " + _debug.MinimaxCount);
+        System.out.println("Average # of children: " + (double)_debug.ChildCount / (double)_debug.NodeCount);
+			}
+
 		  if (checkToken(token, "move")) {
 		    Node _node = new Node(BigBoard.copy(board));
 				switch (token) {
@@ -117,12 +130,12 @@ public class Main {
 						break;
 				}
 				System.out.println("Thinking (depth " + _depth + ")");
-        Debug.getInstance().resetStats();
+        // Debug.getInstance().resetStats();
 				int[] _bestMove = _node.getBestMove(_depth);
-        Debug _debug = Debug.getInstance();
-        System.out.println("Eval calls: " + _debug.EvalCount);
-        System.out.println("Minimax calls: " + _debug.MinimaxCount);
-        System.out.println("Average # of children: " + (double)_debug.ChildCount / (double)_debug.NodeCount);
+        // Debug _debug = Debug.getInstance();
+        // System.out.println("Eval calls: " + _debug.EvalCount);
+        // System.out.println("Minimax calls: " + _debug.MinimaxCount);
+        // System.out.println("Average # of children: " + (double)_debug.ChildCount / (double)_debug.NodeCount);
 				bigSquares.push(_bestMove[0]);
 				smallSquares.push(_bestMove[1]);
 				moveAnywhere.push(board.BigRow == -1);

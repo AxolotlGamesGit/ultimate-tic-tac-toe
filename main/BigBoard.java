@@ -45,8 +45,8 @@ public class BigBoard {
     }
     if ((_bigRow != BigRow  ||  _bigCol != BigCol)
             &&  (BigRow != -1  &&  !Board[BigRow][BigCol].isFinished())) {
-      Node _node = new Node(BigBoard.copy(this));
-      _node.explore(true);
+      // Node _node = new Node(BigBoard.copy(this));
+      // _node.explore(true);
       throw new IllegalArgumentException("Can't move in that board: " + _bigRow + " " + _bigCol);
     }
     if (_bigRow == -1  ||  _bigCol == -1) {

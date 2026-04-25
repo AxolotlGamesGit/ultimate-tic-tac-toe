@@ -1,5 +1,6 @@
 package main;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SmallBoard {
@@ -149,6 +150,31 @@ public class SmallBoard {
         }
       }
     }
+    return _result;
+  }
+
+  public ArrayList<Integer> getOrderedMoves(Player _player) {
+    ArrayList<Integer> _result = new ArrayList<Integer>();
+    for (int _row = 0; _row < 3; _row++) {
+      for (int _col = 0; _col < 3; _col++) {
+        if (Board[_row][_col] == Player.NONE) {
+          _result.add(_row*3 + _col);
+        }
+      }
+    }
+
+    int i = 0;
+    ArrayList<Integer> _newResult = new ArrayList<Integer>();
+    while (i < _result.size()) {
+      if (wouldWin(_result.get(i)/3, _result.get(i)%3, _player)) {
+        _newResult.add(_result.get(i));
+        _result.remove(i);
+        continue;
+      }
+      i++;
+    }
+    _result.addAll(_newResult);
+    
     return _result;
   }
   

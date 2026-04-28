@@ -8,6 +8,7 @@ public class BigBoard {
   public SmallBoard Wins;
   public int BigRow;
   public int BigCol;
+  public int Moves;
     
   public BigBoard() {
     Board = new SmallBoard[3][3];
@@ -20,14 +21,16 @@ public class BigBoard {
     Turn = Player.X;
     BigRow = -1;
     BigCol = -1;
+    Moves = 0;
   }
   
-  public BigBoard(SmallBoard[][] _board, Player _turn, int _bigRow, int _bigCol) {
+  public BigBoard(SmallBoard[][] _board, Player _turn, int _bigRow, int _bigCol, int _moves) {
     Board = _board;
     Turn = _turn;
     BigRow = _bigRow;
     BigCol = _bigCol;
     Wins = new SmallBoard();
+    Moves = _moves;
     for (int _row = 0; _row < 3; _row++) {
       for (int _col = 0; _col < 3; _col++) {
         Wins.move(_row,_col,Board[_row][_col].getWinner());
@@ -36,7 +39,7 @@ public class BigBoard {
   }
   
   public static BigBoard copy(BigBoard _bigBoard) {
-    return new BigBoard(_bigBoard.Board, _bigBoard.Turn, _bigBoard.BigRow, _bigBoard.BigCol);
+    return new BigBoard(_bigBoard.Board, _bigBoard.Turn, _bigBoard.BigRow, _bigBoard.BigCol, _bigBoard.Moves);
   }
   
   public void move(int _bigRow, int _bigCol, int _smallRow, int _smallCol) throws IllegalArgumentException {
@@ -60,6 +63,7 @@ public class BigBoard {
     }
     SmallBoard currentBoard = Board[_bigRow][_bigCol];
     currentBoard.move(_smallRow,_smallCol,Turn);
+    Moves++;
     if (currentBoard.getWinner() != Player.NONE) {
       Wins.move(_bigRow,_bigCol,currentBoard.getWinner());
     }
@@ -98,6 +102,7 @@ public class BigBoard {
       Turn = currentBoard.Board[_smallRow][_smallCol];
     }
     currentBoard.undo(_smallRow,_smallCol);
+    Moves--;
     Wins.Board[_bigRow][_bigCol] = Player.NONE;
     BigRow = _moveAnywhere ? -1 : _bigRow;
     BigCol = _moveAnywhere ? -1 : _bigCol;

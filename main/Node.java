@@ -66,24 +66,18 @@ public class Node {
     for (int _bigRow = 0; _bigRow < 3; _bigRow++) {
       for (int _bigCol = 0; _bigCol < 3; _bigCol++) {
         double _squareValue = 0.;
-        double _squareMult = 1.;
+        double _squareMult = 0.;
         SmallBoard _currentBoard = state.Board[_bigRow][_bigCol];
         _squareValue += _currentBoard.getSquareCount(_player);
         _squareValue -= _currentBoard.getSquareCount(SmallBoard.opposite(_player));
         _squareValue += _currentBoard.getWinningSquareCount(_player) * 3;
         _squareValue -= _currentBoard.getWinningSquareCount(SmallBoard.opposite(_player)) * 3;
 
-        if (_bigRow == 1  &&  _bigCol == 1) {
-          _squareMult = 1.5;
-        }
-        if (Math.max(_bigRow, _bigCol) == 2  &&  Math.min(_bigRow, _bigCol) == 0) {
-          _squareMult = 1.25;
-        }
         if (state.Wins.wouldWin(_bigRow, _bigCol, _player)) {
-          _squareMult *= 2;
+          _squareMult += 1;
         }
         if (state.Wins.wouldWin(_bigRow, _bigCol, SmallBoard.opposite(_player))) {
-          _squareMult *= 2;
+          _squareMult += 1;
         }
 
         _result += _squareValue * _squareMult;

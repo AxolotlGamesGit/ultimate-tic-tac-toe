@@ -139,74 +139,72 @@ public class BigBoard {
       for (int _smallRow = 0; _smallRow < 3; _smallRow++) {
         System.out.print(" ");
         for (int _bigCol = 0; _bigCol < 3; _bigCol++) {
-          // Print small board state if there is no winner
-          if (!Board[_bigRow][_bigCol].isFinished()) {
-            for (int _smallCol = 0; _smallCol < 3; _smallCol++) {
-              switch (Board[_bigRow][_bigCol].Board[_smallRow][_smallCol]) {
-                case X:
-                  System.out.print("x");
+          // X
+          switch (Board[_bigRow][_bigCol].getWinner()) {
+            case NONE:
+              for (int _smallCol = 0; _smallCol < 3; _smallCol++) {
+                switch (Board[_bigRow][_bigCol].Board[_smallRow][_smallCol]) {
+                  case X:
+                    System.out.print("x");
+                    break;
+                  case O:
+                    System.out.print("o");
+                    break;
+                  case NONE:
+                    if ((_bigRow == BigRow  &&  _bigCol == BigCol)  ||  (BigRow == -1)) {
+                      System.out.print("#");
+                    }
+                    else {
+                      System.out.print("-");
+                    }
+                    break;
+                  case TIE:
+                    System.out.print("/");
+                }
+                if (_smallCol < 2) {
+                  System.out.print(" ");
+                }
+              }
+              break;
+            case X:
+              switch (_smallRow) {
+                case 0:
+                  System.out.print(" \\ / ");
                   break;
-                case O:
-                  System.out.print("o");
+                case 1:
+                  System.out.print("  X  ");
                   break;
-                case NONE:
-                  if ((_bigRow == BigRow  &&  _bigCol == BigCol)  ||  (BigRow == -1)) {
-                    System.out.print("#");
-                  }
-                  else {
-                    System.out.print("-");
-                  }
+                case 2:
+                  System.out.print(" / \\ ");
                   break;
               }
-              if (_smallCol < 2) {
-                System.out.print(" ");
+              break;
+            case O:
+              switch (_smallRow) {
+                case 0:
+                  System.out.print(" /‾\\ ");
+                  break;
+                case 1:
+                  System.out.print("|   |");
+                  break;
+                case 2:
+                  System.out.print(" \\_/ ");
+                  break;
               }
-            }
-          }
-          // Print winner as big
-          else {
-            // X
-            switch (Board[_bigRow][_bigCol].getWinner()) {
-              case X:
-                switch (_smallRow) {
-                  case 0:
-                    System.out.print(" \\ / ");
-                    break;
-                  case 1:
-                    System.out.print("  X  ");
-                    break;
-                  case 2:
-                    System.out.print(" / \\ ");
-                    break;
-                }
-                break;
-              case O:
-                switch (_smallRow) {
-                  case 0:
-                    System.out.print(" /‾\\ ");
-                    break;
-                  case 1:
-                    System.out.print("|   |");
-                    break;
-                  case 2:
-                    System.out.print(" \\_/ ");
-                    break;
-                }
-                break;
-              case NONE:
-                switch (_smallRow) {
-                  case 0:
-                    System.out.print("     ");
-                    break;
-                  case 1:
-                    System.out.print("-----");
-                    break;
-                  case 2:
-                    System.out.print("     ");
-                    break;
-                }
-                break;
-            }
+              break;
+            case TIE:
+              switch (_smallRow) {
+                case 0:
+                  System.out.print("     ");
+                  break;
+                case 1:
+                  System.out.print("-----");
+                  break;
+                case 2:
+                  System.out.print("     ");
+                  break;
+              }
+              break;
           }
           if (_bigCol < 2) {
             // System.out.print("  |  ");
@@ -219,18 +217,18 @@ public class BigBoard {
         System.out.println("-----------------------");
       }
     }
-    if (isFinished()) {
-      switch (Wins.getWinner()) {
-        case X:
-          System.out.println("X WINS!");
-          break;
-        case O:
-          System.out.println("O WINS!");
-          break;
-        case NONE:
-          System.out.println("IT'S A TIE!");
-          break;
-      }
-    } 
+    switch (Wins.getWinner()) {
+      case X:
+        System.out.println("X WINS!");
+        break;
+      case O:
+        System.out.println("O WINS!");
+        break;
+      case TIE:
+        System.out.println("IT'S A TIE!");
+        break;
+      case NONE:
+        break;
+    }
   }
 }

@@ -7,7 +7,8 @@ public class SmallBoard {
   public enum Player {
     NONE,
     X,
-    O
+    O,
+    TIE
   }
   
   public Player[][] Board;
@@ -31,6 +32,8 @@ public class SmallBoard {
         return "o";
       case NONE:
         return "-";
+      case TIE:
+        return "/";
     }
     return " ";
   }
@@ -43,8 +46,14 @@ public class SmallBoard {
         return Player.X;
       case NONE:
         return Player.NONE;
+      case TIE:
+        return Player.TIE;
     }
     return Player.NONE;
+  }
+
+  public Player get1d(int _square) {
+    return Board[_square/3][_square%3];
   }
   
   public void move(int _row, int _col, Player _player) throws IllegalArgumentException {
@@ -75,18 +84,21 @@ public class SmallBoard {
   
   public Player getWinner() {
     for (int i = 0; i < 3; i++) {
-      if (Board[i][0] != Player.NONE  &&  Board[i][0] == Board[i][1]  &&  Board[i][1] == Board[i][2]) {
+      if (Board[i][0] != Player.NONE  &&  Board[i][0] != Player.TIE  &&  Board[i][0] == Board[i][1]  &&  Board[i][1] == Board[i][2]) {
         return Board[i][0];
       }
-      if (Board[0][i] != Player.NONE  &&  Board[0][i] == Board[1][i]  &&  Board[1][i] == Board[2][i]) {
+      if (Board[0][i] != Player.NONE  &&  Board[0][i] != Player.TIE  &&  Board[0][i] == Board[1][i]  &&  Board[1][i] == Board[2][i]) {
         return Board[0][i];
       }
     }
-    if (Board[1][1] != Player.NONE  &&  Board[0][0] == Board[1][1]  &&  Board[1][1] == Board[2][2]) {
+    if (Board[1][1] != Player.NONE  &&  Board[1][1] != Player.TIE  &&  Board[0][0] == Board[1][1]  &&  Board[1][1] == Board[2][2]) {
       return Board[1][1];
     }
-    if (Board[1][1] != Player.NONE  &&  Board[0][2] == Board[1][1]  &&  Board[1][1] == Board[2][0]) {
+    if (Board[1][1] != Player.NONE  &&  Board[1][1] != Player.TIE  &&  Board[0][2] == Board[1][1]  &&  Board[1][1] == Board[2][0]) {
       return Board[1][1];
+    }
+    if (isFull()) {
+      return Player.TIE;
     }
     return Player.NONE;
   }
@@ -103,7 +115,7 @@ public class SmallBoard {
   }
   
   public boolean isFinished() {
-    return isFull()  ||  getWinner() != Player.NONE;
+    return getWinner() != Player.NONE;
   }
 
   public boolean wouldWin(int _row, int _col, Player _player) {
@@ -115,7 +127,7 @@ public class SmallBoard {
     }
     boolean _result = false;
     move(_row, _col, _player);
-    if (getWinner() != Player.NONE) {
+    if (getWinner() != Player.NONE  &&  getWinner() != Player.TIE) {
       _result = true;
     }
     undo(_row, _col);
@@ -176,6 +188,23 @@ public class SmallBoard {
     _result.addAll(_newResult);
     
     return _result;
+  }
+
+  public double eval(Player _player) {
+    double _result = 0.;
+    _result += 1. * getWinningSquareCount(_player);
+    _result -= 1. * getWinningSquareCount(SmallBoard.opposite(_player));
+    if (_result < 0.) {
+      _result += 0.2 * getSquareCount(_player);
+    }
+    else if (_result > 0.) {
+      _result -= 0.2 * getSquareCount(SmallBoard.opposite(_player));
+    }
+    else {
+      _result += 0.2 * getSquareCount(_player);
+      _result -= 0.2 * getSquareCount(SmallBoard.opposite(_player));
+    }
+    return _result / 5.; // Normalize to -1 to 1
   }
   
   public void print() {

@@ -18,18 +18,17 @@ public class Main {
 		Stack<Integer> smallSquares = new Stack<Integer>();
 		Stack<Boolean> moveAnywhere = new Stack<Boolean>();
 		String token = "";
-		int xDepth = -1;
+		int xDepth = 6;
 		int oDepth = 6;
 		while (!checkToken(token, "close")) {
-		  int _depth = 7;
+		  int _depth = 6;
 		  if (board.Moves > 90) {
 		    xDepth = -1;
 		    oDepth = -1;
 		  }
 		  // if (board.Moves % 10 == 0) {
 		  //   token = scanner.nextLine().trim().toLowerCase();
-		  // }
-		  // else 
+		  // } else 
 		  if ((board.Turn == Player.X  &&  xDepth == -1)  ||  
 		          (board.Turn == Player.O  &&  oDepth == -1)  ||
 		          (board.Turn == Player.NONE)  ||

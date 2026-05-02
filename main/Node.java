@@ -92,99 +92,42 @@ public class Node {
     // If there is something on the big board, use overcomplicated method
     else {
       // Count the % of possible 3 in a rows each big square is in
-      int[][] _playerPotentialWinSquares = new int[3][3];
-      for (int _row = 0; _row < 3; _row++) {
-        Arrays.fill(_playerPotentialWinSquares[_row],0);
-      }
-      int[][] _enemyPotentialWinSquares = new int[3][3];
-      for (int _row = 0; _row < 3; _row++) {
-        Arrays.fill(_enemyPotentialWinSquares[_row],0);
-      }
-      ROW: for (int _row = 0; _row < 3; _row++) {
-        for (int _col = 0; _col < 3; _col++) {
-          if (state.Wins.Board[_row][_col] == SmallBoard.opposite(_player)) {
-            continue ROW;
+      int[] _playerPotentialWinSquares = new int[9];
+      Arrays.fill(_playerPotentialWinSquares,0);
+      int[] _enemyPotentialWinSquares = new int[9];
+      Arrays.fill(_enemyPotentialWinSquares,0);
+      int[][] _winPatterns = new int[][] {{0, 1, 2},
+                                          {3, 4, 5},
+                                          {6, 7, 8},
+                                          {0, 3, 6},
+                                          {1, 4, 7},
+                                          {2, 5, 8},
+                                          {0, 4, 8},
+                                          {2, 4, 6}};
+      PATTERN: for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (state.Wins.get1d(_winPatterns[i][j]) == Player.TIE) {
+            continue PATTERN;
+          }
+          if (state.Wins.get1d(_winPatterns[i][j]) == SmallBoard.opposite(_player)) {
+            break;
+          }
+          if (j == 2) {
+            _playerWins ++;
+            _playerPotentialWinSquares[_winPatterns[i][0]]++;
+            _playerPotentialWinSquares[_winPatterns[i][1]]++;
+            _playerPotentialWinSquares[_winPatterns[i][2]]++;
           }
         }
-        _playerWins++;
-        for (int _col = 0; _col < 3; _col++) {
-          _playerPotentialWinSquares[_row][_col]++;
-        }
-      }
-      COL: for (int _col = 0; _col < 3; _col++) {
-        for (int _row = 0; _row < 3; _row++) {
-          if (state.Wins.Board[_row][_col] == SmallBoard.opposite(_player)) {
-            continue COL;
+        for (int j = 0; j < 3; j++) {
+          if (state.Wins.get1d(_winPatterns[i][j]) == _player) {
+            break;
           }
-        }
-        _playerWins++;
-        for (int _row = 0; _row < 3; _row++) {
-          _playerPotentialWinSquares[_row][_col]++;
-        }
-      }
-      for (int i = 0; i < 3; i++) {
-        if (state.Wins.Board[i][i] == SmallBoard.opposite(_player)) {
-          break;
-        }
-        if (i == 2) {
-          _playerWins++;
-          for (int j = 0; j < 3; j++) {
-            _playerPotentialWinSquares[j][j]++;
-          }
-        }
-      }
-      for (int i = 0; i < 3; i++) {
-        if (state.Wins.Board[i][2-i] == SmallBoard.opposite(_player)) {
-          break;
-        }
-        if (i == 2) {
-          _playerWins++;
-          for (int j = 0; j < 3; j++) {
-            _playerPotentialWinSquares[j][2-j]++;
-          }
-        }
-      }
-      ROW: for (int _row = 0; _row < 3; _row++) {
-        for (int _col = 0; _col < 3; _col++) {
-          if (state.Wins.Board[_row][_col] == _player) {
-            continue ROW;
-          }
-        }
-        _enemyWins++;
-        for (int _col = 0; _col < 3; _col++) {
-          _enemyPotentialWinSquares[_row][_col]++;
-        }
-      }
-      COL: for (int _col = 0; _col < 3; _col++) {
-        for (int _row = 0; _row < 3; _row++) {
-          if (state.Wins.Board[_row][_col] == _player) {
-            continue COL;
-          }
-        }
-        _enemyWins++;
-        for (int _row = 0; _row < 3; _row++) {
-          _enemyPotentialWinSquares[_row][_col]++;
-        }
-      }
-      for (int i = 0; i < 3; i++) {
-        if (state.Wins.Board[i][i] == _player) {
-          break;
-        }
-        if (i == 2) {
-          _enemyWins++;
-          for (int j = 0; j < 3; j++) {
-            _enemyPotentialWinSquares[j][j]++;
-          }
-        }
-      }
-      for (int i = 0; i < 3; i++) {
-        if (state.Wins.Board[i][2-i] == _player) {
-          break;
-        }
-        if (i == 2) {
-          _enemyWins++;
-          for (int j = 0; j < 3; j++) {
-            _enemyPotentialWinSquares[j][2-j]++;
+          if (j == 2) {
+            _enemyWins ++;
+            _enemyPotentialWinSquares[_winPatterns[i][0]]++;
+            _enemyPotentialWinSquares[_winPatterns[i][1]]++;
+            _enemyPotentialWinSquares[_winPatterns[i][2]]++;
           }
         }
       }
@@ -213,13 +156,13 @@ public class Node {
             state.Wins.undo(_row,_col);
           }
           if (_print) {
-            System.out.println(_row + " " + _col + " " + _playerWins + " " + _playerPotentialWinSquares[_row][_col] + " " + _enemyWins + " " + _enemyPotentialWinSquares[_row][_col]);
+            System.out.println(_row + " " + _col + " " + _playerWins + " " + _playerPotentialWinSquares[_row*3+_col] + " " + _enemyWins + " " + _enemyPotentialWinSquares[_row*3+_col]);
           }
           if (_playerWins != 0) {
-            _squareMults[_row][_col] += 1.25 * (double)(_playerPotentialWinSquares[_row][_col]) / ((double)_playerWins);
+            _squareMults[_row][_col] += 1.25 * (double)(_playerPotentialWinSquares[_row*3+_col]) / ((double)_playerWins);
           }
           if (_enemyWins != 0) {
-            _squareMults[_row][_col] += 1.25 * (double)(_enemyPotentialWinSquares[_row][_col]) / ((double)_enemyWins);
+            _squareMults[_row][_col] += 1.25 * (double)(_enemyPotentialWinSquares[_row*3+_col]) / ((double)_enemyWins);
           }
         }
       }
@@ -231,13 +174,7 @@ public class Node {
         if (_squareMults[_bigRow][_bigCol] == -1.) {
           continue;
         }
-        double _squareValue = 0.;
-        SmallBoard _currentBoard = state.Board[_bigRow][_bigCol];
-        _squareValue += 0.2 * _currentBoard.getSquareCount(_player);
-        _squareValue -= 0.2 * _currentBoard.getSquareCount(SmallBoard.opposite(_player));
-        _squareValue += 1. *  _currentBoard.getWinningSquareCount(_player);
-        _squareValue -= 1. * _currentBoard.getWinningSquareCount(SmallBoard.opposite(_player));
-
+        double _squareValue = 5. * state.Board[_bigRow][_bigCol].eval(_player);
         _result += _squareValue * _squareMults[_bigRow][_bigCol];
 
         if (_print) {
@@ -251,11 +188,7 @@ public class Node {
     }
 
     // Calculate the value of the overall board state
-    double _boardValue = 0.;
-    _boardValue += 7 * state.Wins.getSquareCount(_player);
-    _boardValue -= 7 * state.Wins.getSquareCount(SmallBoard.opposite(_player));
-    _boardValue += 20 * state.Wins.getWinningSquareCount(_player);
-    _boardValue -= 20 * state.Wins.getWinningSquareCount(SmallBoard.opposite(_player));
+    double _boardValue = 100 * state.Wins.eval(_player);
     if (state.BigRow == -1) {
       if (state.Turn == _player) {
         _boardValue += 10;
@@ -351,7 +284,7 @@ public class Node {
         case X:
           return eval2(false, _player);
         case O:
-          return eval2(false, _player);
+          return eval(false, _player);
         default:
           return 0;
       }

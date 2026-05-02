@@ -18,10 +18,18 @@ public class Main {
 		Stack<Integer> smallSquares = new Stack<Integer>();
 		Stack<Boolean> moveAnywhere = new Stack<Boolean>();
 		String token = "";
-		int xDepth = 10;
-		int oDepth = -1;
+		int xDepth = -1;
+		int oDepth = 6;
 		while (!checkToken(token, "close")) {
-		  int _depth = 8;
+		  int _depth = 7;
+		  if (board.Moves > 90) {
+		    xDepth = -1;
+		    oDepth = -1;
+		  }
+		  // if (board.Moves % 10 == 0) {
+		  //   token = scanner.nextLine().trim().toLowerCase();
+		  // }
+		  // else 
 		  if ((board.Turn == Player.X  &&  xDepth == -1)  ||  
 		          (board.Turn == Player.O  &&  oDepth == -1)  ||
 		          (board.Turn == Player.NONE)  ||
@@ -86,7 +94,7 @@ public class Main {
 
 			if (checkToken(token, "minimax")) {
 		    Node _node = new Node(BigBoard.copy(board));
-				System.out.println(_node.minimax(_depth,true,-1000000,100000,board.Turn));
+				System.out.println(_node.minimax(_depth,true,Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY,board.Turn));
 				board.print();
 		    continue;
 		  }
@@ -103,7 +111,7 @@ public class Main {
 		  }
 		  
 			if (checkToken(token, "move")) {
-				if (board.Moves == 0) {
+        if (board.Moves == 0) {
 					System.out.println("Pre-programmed first move");
 					board.move(1,1,2,2);
 					bigSquares.push(4);
@@ -133,7 +141,7 @@ public class Main {
 						_depth += 5;
 						break;
 				}
-				System.out.println("Thinking (depth " + _depth + ")");
+				System.out.println("Thinking (" + SmallBoard.getString(board.Turn) + ") (depth " + _depth + ")");
         // Debug.getInstance().resetStats();
 				int[] _bestMove = _node.getBestMove(_depth);
         // Debug _debug = Debug.getInstance();

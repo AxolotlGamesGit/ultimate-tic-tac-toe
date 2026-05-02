@@ -9,7 +9,7 @@ public class BigBoard {
   public int BigRow;
   public int BigCol;
   public int Moves;
-    
+
   public BigBoard() {
     Board = new SmallBoard[3][3];
     for (int _row = 0; _row < 3; _row++) {
@@ -30,12 +30,12 @@ public class BigBoard {
     BigRow = _bigRow;
     BigCol = _bigCol;
     Wins = new SmallBoard();
-    Moves = _moves;
     for (int _row = 0; _row < 3; _row++) {
       for (int _col = 0; _col < 3; _col++) {
         Wins.move(_row,_col,Board[_row][_col].getWinner());
       }
     }
+    Moves = _moves;
   }
   
   public static BigBoard copy(BigBoard _bigBoard) {

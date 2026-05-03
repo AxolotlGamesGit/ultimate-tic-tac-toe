@@ -133,8 +133,8 @@ public class Node {
       }
   
       // Calculate the multiplier for each big square based on % of possible wins, # of win squares created and if it wins
-      int _playerWinSquares = state.Wins.getWinningSquareCount(_player);
-      int _enemyWinSquares = state.Wins.getWinningSquareCount(SmallBoard.opposite(_player));
+      int _playerWinSquares = state.Wins.getWinSquareCount(_player);
+      int _enemyWinSquares = state.Wins.getWinSquareCount(SmallBoard.opposite(_player));
       for (int _row = 0; _row < 3; _row++) {
         for (int _col = 0; _col < 3; _col++) {
           if (state.Board[_row][_col].isFinished()) {
@@ -149,20 +149,20 @@ public class Node {
           }
           if (_squareMults[_row][_col] == 0.) {
             state.Wins.move(_row,_col,_player);
-            _squareMults[_row][_col] += 0.5 * (state.Wins.getWinningSquareCount(_player) - _playerWinSquares);
+            _squareMults[_row][_col] += 0.5 * (state.Wins.getWinSquareCount(_player) - _playerWinSquares);
             state.Wins.undo(_row,_col);
             state.Wins.move(_row,_col,SmallBoard.opposite(_player));
-            _squareMults[_row][_col] += 0.5 * (state.Wins.getWinningSquareCount(SmallBoard.opposite(_player)) - _enemyWinSquares);
+            _squareMults[_row][_col] += 0.5 * (state.Wins.getWinSquareCount(SmallBoard.opposite(_player)) - _enemyWinSquares);
             state.Wins.undo(_row,_col);
           }
           if (_print) {
             System.out.println(_row + " " + _col + " " + _playerWins + " " + _playerPotentialWinSquares[_row*3+_col] + " " + _enemyWins + " " + _enemyPotentialWinSquares[_row*3+_col]);
           }
           if (_playerWins != 0) {
-            _squareMults[_row][_col] += 1.25 * (double)(_playerPotentialWinSquares[_row*3+_col]) / ((double)_playerWins);
+            _squareMults[_row][_col] += 2. * (double)(_playerPotentialWinSquares[_row*3+_col]) / ((double)_playerWins);
           }
           if (_enemyWins != 0) {
-            _squareMults[_row][_col] += 1.25 * (double)(_enemyPotentialWinSquares[_row*3+_col]) / ((double)_enemyWins);
+            _squareMults[_row][_col] += 2. * (double)(_enemyPotentialWinSquares[_row*3+_col]) / ((double)_enemyWins);
           }
         }
       }
@@ -174,7 +174,13 @@ public class Node {
         if (_squareMults[_bigRow][_bigCol] == -1.) {
           continue;
         }
-        double _squareValue = 5. * state.Board[_bigRow][_bigCol].eval(_player);
+        double _squareValue = 1. * state.Board[_bigRow][_bigCol].eval(_player);
+        // SmallBoard _currentBoard = state.Board[_bigRow][_bigCol];
+        // double _squareValue = 0.;
+        // _squareValue += _currentBoard.getSquareCount(_player);
+        // _squareValue -= _currentBoard.getSquareCount(SmallBoard.opposite(_player));
+        // _squareValue += _currentBoard.getWinSquareCount(_player) * 3;
+        // _squareValue -= _currentBoard.getWinSquareCount(SmallBoard.opposite(_player)) * 3;
         _result += _squareValue * _squareMults[_bigRow][_bigCol];
 
         if (_print) {
@@ -188,7 +194,7 @@ public class Node {
     }
 
     // Calculate the value of the overall board state
-    double _boardValue = 100 * state.Wins.eval(_player);
+    double _boardValue = 20 * state.Wins.eval(_player);
     if (state.BigRow == -1) {
       if (state.Turn == _player) {
         _boardValue += 10;
@@ -231,8 +237,8 @@ public class Node {
         SmallBoard _currentBoard = state.Board[_bigRow][_bigCol];
         _squareValue += _currentBoard.getSquareCount(_player);
         _squareValue -= _currentBoard.getSquareCount(SmallBoard.opposite(_player));
-        _squareValue += _currentBoard.getWinningSquareCount(_player) * 3;
-        _squareValue -= _currentBoard.getWinningSquareCount(SmallBoard.opposite(_player)) * 3;
+        _squareValue += _currentBoard.getWinSquareCount(_player) * 3;
+        _squareValue -= _currentBoard.getWinSquareCount(SmallBoard.opposite(_player)) * 3;
 
         if (_bigRow == 1  &&  _bigCol == 1) {
           _squareMult = 1.4;
@@ -262,8 +268,8 @@ public class Node {
     double _boardValue = 0.;
     _boardValue += state.Wins.getSquareCount(_player) * 10;
     _boardValue -= state.Wins.getSquareCount(SmallBoard.opposite(_player)) * 10;
-    _boardValue += state.Wins.getWinningSquareCount(_player) * 30;
-    _boardValue -= state.Wins.getWinningSquareCount(SmallBoard.opposite(_player)) * 30;
+    _boardValue += state.Wins.getWinSquareCount(_player) * 30;
+    _boardValue -= state.Wins.getWinSquareCount(SmallBoard.opposite(_player)) * 30;
     _result += _boardValue;
     if (_print) {
       System.out.println("");

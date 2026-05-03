@@ -148,7 +148,7 @@ public class SmallBoard {
     return _result;
   }
 
-  public int getWinningSquareCount(Player _player) {
+  public int getWinSquareCount(Player _player) {
     if (isFinished()) {
       return 0;
     }
@@ -192,19 +192,24 @@ public class SmallBoard {
 
   public double eval(Player _player) {
     double _result = 0.;
-    _result += 1. * getWinningSquareCount(_player);
-    _result -= 1. * getWinningSquareCount(SmallBoard.opposite(_player));
-    if (_result < 0.) {
-      _result += 0.2 * getSquareCount(_player);
+    Player _enemy = opposite(_player);
+    int _playerWinSquares = getWinSquareCount(_player);
+    int _enemyWinSquares = getWinSquareCount(_enemy);
+    _result += 1. * _playerWinSquares;
+    _result -= 1. * _enemyWinSquares;
+    for (int _row = 0; _row < 3; _row++) {
+      for (int _col = 0; _col < 3; _col++) {
+        if (Board[_row][_col] == Player.NONE) {
+          move(_row,_col,_player);
+          _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
+          undo(_row,_col);
+          move(_row,_col,_enemy);
+          _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
+          undo(_row,_col);
+        }
+      }
     }
-    else if (_result > 0.) {
-      _result -= 0.2 * getSquareCount(SmallBoard.opposite(_player));
-    }
-    else {
-      _result += 0.2 * getSquareCount(_player);
-      _result -= 0.2 * getSquareCount(SmallBoard.opposite(_player));
-    }
-    return _result / 5.; // Normalize to -1 to 1
+    return _result;
   }
   
   public void print() {

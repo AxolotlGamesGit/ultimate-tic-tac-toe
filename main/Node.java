@@ -106,10 +106,10 @@ public class Node {
                                           {2, 4, 6}};
       PATTERN: for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 3; j++) {
-          if (state.Wins.get1d(_winPatterns[i][j]) == Player.TIE) {
+          if (state.Wins.getSquare(_winPatterns[i][j]) == Player.TIE) {
             continue PATTERN;
           }
-          if (state.Wins.get1d(_winPatterns[i][j]) == SmallBoard.opposite(_player)) {
+          if (state.Wins.getSquare(_winPatterns[i][j]) == SmallBoard.opposite(_player)) {
             break;
           }
           if (j == 2) {
@@ -120,7 +120,7 @@ public class Node {
           }
         }
         for (int j = 0; j < 3; j++) {
-          if (state.Wins.get1d(_winPatterns[i][j]) == _player) {
+          if (state.Wins.getSquare(_winPatterns[i][j]) == _player) {
             break;
           }
           if (j == 2) {

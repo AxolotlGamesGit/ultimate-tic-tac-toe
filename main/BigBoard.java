@@ -99,11 +99,11 @@ public class BigBoard {
       Turn = Player.X;
     }
     if (Turn == Player.NONE) {
-      Turn = currentBoard.Board[_smallRow][_smallCol];
+      Turn = currentBoard.getSquare2d(_smallRow, _smallCol);
     }
     currentBoard.undo(_smallRow,_smallCol);
     Moves--;
-    Wins.Board[_bigRow][_bigCol] = Player.NONE;
+    Wins.move(_bigRow, _bigCol, Player.NONE);
     BigRow = _moveAnywhere ? -1 : _bigRow;
     BigCol = _moveAnywhere ? -1 : _bigCol;
   }
@@ -143,7 +143,7 @@ public class BigBoard {
           switch (Board[_bigRow][_bigCol].getWinner()) {
             case NONE:
               for (int _smallCol = 0; _smallCol < 3; _smallCol++) {
-                switch (Board[_bigRow][_bigCol].Board[_smallRow][_smallCol]) {
+                switch (Board[_bigRow][_bigCol].getSquare2d(_smallRow, _smallCol)) {
                   case X:
                     System.out.print("x");
                     break;

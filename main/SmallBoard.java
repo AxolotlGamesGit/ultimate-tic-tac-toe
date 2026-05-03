@@ -5,13 +5,19 @@ import java.util.Arrays;
 
 public class SmallBoard {
   public enum Player {
-    NONE,
-    X,
-    O,
-    TIE
+    NONE(0),
+    X(1),
+    O(2),
+    TIE(3);
+
+    public final int Value;
+
+    Player(int _value) {
+      this.Value = _value;
+    }
   }
   
-  public Player[][] Board;
+  private Player[][] Board;
 
   public SmallBoard() {
     Board = new Player[3][3];
@@ -52,8 +58,12 @@ public class SmallBoard {
     return Player.NONE;
   }
 
-  public Player get1d(int _square) {
+  public Player getSquare(int _square) {
     return Board[_square/3][_square%3];
+  }
+
+  public Player getSquare2d(int _row, int _col) {
+    return Board[_row][_col];
   }
   
   public void move(int _row, int _col, Player _player) throws IllegalArgumentException {
@@ -61,7 +71,7 @@ public class SmallBoard {
             _col <= -1  ||  _col >= 3) {
       throw new IndexOutOfBoundsException();
     }
-    if (Board[_row][_col] == Player.NONE) {
+    if (Board[_row][_col] == Player.NONE  ||  _player == Player.NONE) {
       Board[_row][_col] = _player;
     }
     else {
@@ -197,18 +207,18 @@ public class SmallBoard {
     int _enemyWinSquares = getWinSquareCount(_enemy);
     _result += 1. * _playerWinSquares;
     _result -= 1. * _enemyWinSquares;
-    for (int _row = 0; _row < 3; _row++) {
-      for (int _col = 0; _col < 3; _col++) {
-        if (Board[_row][_col] == Player.NONE) {
-          move(_row,_col,_player);
-          _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
-          undo(_row,_col);
-          move(_row,_col,_enemy);
-          _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
-          undo(_row,_col);
-        }
-      }
-    }
+    // for (int _row = 0; _row < 3; _row++) {
+    //   for (int _col = 0; _col < 3; _col++) {
+    //     if (Board[_row][_col] == Player.NONE) {
+    //       move(_row,_col,_player);
+    //       _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
+    //       undo(_row,_col);
+    //       move(_row,_col,_enemy);
+    //       _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
+    //       undo(_row,_col);
+    //     }
+    //   }
+    // }
     return _result;
   }
   

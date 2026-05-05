@@ -3,34 +3,13 @@ package main;
 import java.util.ArrayList;
 
 public class SmallBoard {
-  public enum Player {
-    NONE(0),
-    X(1),
-    O(2),
-    TIE(3);
-
-    public final int Value;
-
-    Player(int _value) {
-      this.Value = _value;
-    }
-    
-    public static Player fromInt(int _value) {
-      switch (_value) {
-        case 0:
-          return NONE;
-        case 1:
-          return X;
-        case 2:
-          return O;
-        case 3:
-          return TIE;
-      }
-      return NONE;
-    }
-  }
-  
   private int board;
+
+  private static final int TABLE_SIZE = 4^9+1;
+  private static final int SMALL_TABLE_SIZE = 3^9+1;
+  private static final int[] WINNERS = new int[TABLE_SIZE];
+  private static final int[] WIN_SQUARE_COUNT = new int[TABLE_SIZE];
+  private static final int[] SMALL_EVALS = new int[SMALL_TABLE_SIZE];
 
   public SmallBoard() {
     board = 0;
@@ -40,55 +19,55 @@ public class SmallBoard {
     board = _board;
   }
   
-  public static String getString(Player _player) {
+  public static String getString(int _player) {
     switch(_player) {
-      case X:
+      case Constants.X:
         return "x";
-      case O:
+      case Constants.O:
         return "o";
-      case NONE:
+      case Constants.NONE:
         return "-";
-      case TIE:
+      case Constants.TIE:
         return "/";
     }
     return " ";
   }
 
-  public static Player opposite(Player _player) {
+  public static int opposite(int _player) {
     switch(_player) {
-      case X:
-        return Player.O;
-      case O:
-        return Player.X;
-      case NONE:
-        return Player.NONE;
-      case TIE:
-        return Player.TIE;
+      case Constants.X:
+        return Constants.O;
+      case Constants.O:
+        return Constants.X;
+      case Constants.NONE:
+        return Constants.NONE;
+      case Constants.TIE:
+        return Constants.TIE;
     }
-    return Player.NONE;
+    return Constants.NONE;
   }
 
-  public Player getSquare(int _square) {
-    return Player.fromInt((board >> 2*_square)&3);
+  public int getSquare(int _square) {
+    return (board >> 2*_square)&3;
   }
 
-  public Player getSquare2d(int _row, int _col) {
+  public int getSquare2d(int _row, int _col) {
     return getSquare(_row*3+_col);
   }
   
-  public void setSquare(int _square, Player _player) {
-    board = (board & (~(3<<2*_square))) | (_player.Value<<2*_square);
+  public void setSquare(int _square, int _player) {
+    board = (board & (~(3<<2*_square))) | (_player<<2*_square);
   }
 
-  public void setSquare2d(int _row, int _col, Player _player) {
+  public void setSquare2d(int _row, int _col, int _player) {
     setSquare(_row*3+_col, _player);
   }
   
-  public void move(int _square, Player _player) throws IllegalArgumentException {
+  public void move(int _square, int _player) throws IllegalArgumentException {
     if (_square <= -1  ||  _square >= 9) {
       throw new IndexOutOfBoundsException();
     }
-    if (getSquare(_square) == Player.NONE  ||  _player == Player.NONE) {
+    if (getSquare(_square) == Constants.NONE  ||  _player == Constants.NONE) {
       setSquare(_square, _player);
     }
     else {
@@ -96,7 +75,7 @@ public class SmallBoard {
     }
   }
   
-  public void move2d(int _row, int _col, Player _player) throws IllegalArgumentException {
+  public void move2d(int _row, int _col, int _player) throws IllegalArgumentException {
     move(_row*3+_col, _player);
   }
   
@@ -104,8 +83,8 @@ public class SmallBoard {
     if (_square <= -1  ||  _square >= 9) {
       throw new IndexOutOfBoundsException();
     }
-    if (getSquare(_square) != Player.NONE) {
-      setSquare(_square, Player.NONE);
+    if (getSquare(_square) != Constants.NONE) {
+      setSquare(_square, Constants.NONE);
     }
     else {
       throw new IllegalArgumentException("Can't undo: no player on that square " + _square);
@@ -116,7 +95,7 @@ public class SmallBoard {
     undo(_row*3+_col);
   }
   
-  public Player getWinner() {
+  public int getWinner() {
     int[][] _winPatterns = new int[][] {{0, 1, 2},
                                           {3, 4, 5},
                                           {6, 7, 8},
@@ -126,22 +105,22 @@ public class SmallBoard {
                                           {0, 4, 8},
                                           {2, 4, 6}};
     for (int i = 0; i < 8; i++) {
-      if (getSquare(_winPatterns[i][0]) != Player.NONE  &&  
-          getSquare(_winPatterns[i][0]) != Player.TIE  &&
+      if (getSquare(_winPatterns[i][0]) != Constants.NONE  &&  
+          getSquare(_winPatterns[i][0]) != Constants.TIE  &&
           getSquare(_winPatterns[i][0]) == getSquare(_winPatterns[i][1])  &&
           getSquare(_winPatterns[i][1]) == getSquare(_winPatterns[i][2])) {
         return getSquare(_winPatterns[i][0]);
       }
     }
     if (isFull()) {
-      return Player.TIE;
+      return Constants.TIE;
     }
-    return Player.NONE;
+    return Constants.NONE;
   }
   
   public boolean isFull() {
     for (int i = 0; i < 9; i++) {
-      if (getSquare(i) == Player.NONE) {
+      if (getSquare(i) == Constants.NONE) {
         return false;
       }
     }
@@ -149,11 +128,11 @@ public class SmallBoard {
   }
   
   public boolean isFinished() {
-    return getWinner() != Player.NONE;
+    return getWinner() != Constants.NONE;
   }
 
-  public boolean wouldWin(int _row, int _col, Player _player) {
-    if (getSquare2d(_row,_col) != Player.NONE) {
+  public boolean wouldWin(int _row, int _col, int _player) {
+    if (getSquare2d(_row,_col) != Constants.NONE) {
       return false;
     }
     if (isFinished()) {
@@ -161,15 +140,15 @@ public class SmallBoard {
     }
     boolean _result = false;
     setSquare2d(_row, _col, _player);
-    if (getWinner() != Player.NONE  &&  getWinner() != Player.TIE) {
+    if (getWinner() != Constants.NONE  &&  getWinner() != Constants.TIE) {
       _result = true;
     }
-    setSquare2d(_row, _col, Player.NONE);
+    setSquare2d(_row, _col, Constants.NONE);
 
     return _result;
   }
 
-  public int getSquareCount(Player _player) {
+  public int getSquareCount(int _player) {
     int _result = 0;
     for (int i = 0; i < 9; i++) {
       if (getSquare(i) == _player) {
@@ -180,14 +159,14 @@ public class SmallBoard {
     return _result;
   }
 
-  public int getWinSquareCount(Player _player) {
+  public int getWinSquareCount(int _player) {
     if (isFinished()) {
       return 0;
     }
     int _result = 0;
     for (int _row = 0; _row < 3; _row++) {
       for (int _col = 0; _col < 3; _col++) {
-        if (getSquare2d(_row,_col) == Player.NONE) {
+        if (getSquare2d(_row,_col) == Constants.NONE) {
           if (wouldWin(_row, _col, _player)) {
             _result++;
           }
@@ -197,10 +176,10 @@ public class SmallBoard {
     return _result;
   }
 
-  public ArrayList<Integer> getOrderedMoves(Player _player) {
+  public ArrayList<Integer> getOrderedMoves(int _player) {
     ArrayList<Integer> _result = new ArrayList<Integer>();
     for (int i = 0; i < 9; i++) {
-      if (getSquare(i) == Player.NONE) {
+      if (getSquare(i) == Constants.NONE) {
         _result.add(i);
       }
     }
@@ -220,15 +199,15 @@ public class SmallBoard {
     return _result;
   }
 
-  public double eval(Player _player) {
+  public double eval(int _player) {
     double _result = 0.;
-    Player _enemy = opposite(_player);
+    int _enemy = opposite(_player);
     int _playerWinSquares = getWinSquareCount(_player);
     int _enemyWinSquares = getWinSquareCount(_enemy);
     _result += 1. * _playerWinSquares;
     _result -= 1. * _enemyWinSquares;
     for (int _square = 0; _square < 9; _square++) {
-      if (getSquare(_square) == Player.NONE) {
+      if (getSquare(_square) == Constants.NONE) {
         move(_square,_player);
         _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
         undo(_square);

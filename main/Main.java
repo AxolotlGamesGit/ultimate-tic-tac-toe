@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 
-import main.SmallBoard.Player;
-
 public class Main {
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
@@ -29,15 +27,15 @@ public class Main {
 		  // if (board.Moves % 10 == 0) {
 		  //   token = scanner.nextLine().trim().toLowerCase();
 		  // } else 
-		  if ((board.Turn == Player.X  &&  xDepth == -1)  ||  
-		          (board.Turn == Player.O  &&  oDepth == -1)  ||
-		          (board.Turn == Player.NONE)  ||
+		  if ((board.Turn == Constants.X  &&  xDepth == -1)  ||  
+		          (board.Turn == Constants.O  &&  oDepth == -1)  ||
+		          (board.Turn == Constants.NONE)  ||
 							(board.isFinished())) {
 			  token = scanner.nextLine().trim().toLowerCase();
 		  }
 		  else {
 			  token = "move";
-			  if (board.Turn == Player.X) {
+			  if (board.Turn == Constants.X) {
 			    _depth = xDepth;
 			  }
 			  else {
@@ -72,14 +70,14 @@ public class Main {
 
       if (checkToken(token, "eval-o")) {
 		    Node _node = new Node(BigBoard.copy(board));
-				System.out.println(_node.eval(true, Player.O));
+				System.out.println(_node.eval(true, Constants.O));
 				board.print();
 		    continue;
 		  }
 
       if (checkToken(token, "eval-x")) {
 		    Node _node = new Node(BigBoard.copy(board));
-				System.out.println(_node.eval(true, Player.X));
+				System.out.println(_node.eval(true, Constants.X));
 				board.print();
 		    continue;
 		  }

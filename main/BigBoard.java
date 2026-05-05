@@ -1,10 +1,8 @@
 package main;
 
-import main.SmallBoard.Player;
-
 public class BigBoard {
   public SmallBoard[][] Board;
-  public Player Turn;
+  public int Turn;
   public SmallBoard Wins;
   public int BigRow;
   public int BigCol;
@@ -18,13 +16,13 @@ public class BigBoard {
       }
     }
     Wins = new SmallBoard();
-    Turn = Player.X;
+    Turn = Constants.X;
     BigRow = -1;
     BigCol = -1;
     Moves = 0;
   }
   
-  public BigBoard(SmallBoard[][] _board, Player _turn, int _bigRow, int _bigCol, int _moves) {
+  public BigBoard(SmallBoard[][] _board, int _turn, int _bigRow, int _bigCol, int _moves) {
     Board = _board;
     Turn = _turn;
     BigRow = _bigRow;
@@ -43,7 +41,7 @@ public class BigBoard {
   }
   
   public void move(int _bigRow, int _bigCol, int _smallRow, int _smallCol) throws IllegalArgumentException {
-    if (Turn == Player.NONE) {
+    if (Turn == Constants.NONE) {
       throw new IllegalArgumentException("Game already over");
     }
     if ((_bigRow != BigRow  ||  _bigCol != BigCol)
@@ -64,7 +62,7 @@ public class BigBoard {
     SmallBoard currentBoard = Board[_bigRow][_bigCol];
     currentBoard.move2d(_smallRow,_smallCol,Turn);
     Moves++;
-    if (currentBoard.getWinner() != Player.NONE) {
+    if (currentBoard.getWinner() != Constants.NONE) {
       Wins.move2d(_bigRow,_bigCol,currentBoard.getWinner());
     }
     BigRow = _smallRow;
@@ -74,13 +72,13 @@ public class BigBoard {
       BigCol = -1;
     }
     if (isFinished()) {
-      Turn = Player.NONE;
+      Turn = Constants.NONE;
     }
-    if (Turn == Player.X) {
-      Turn = Player.O;
+    if (Turn == Constants.X) {
+      Turn = Constants.O;
     }
-    else if (Turn == Player.O) {
-      Turn = Player.X;
+    else if (Turn == Constants.O) {
+      Turn = Constants.X;
     }
   }
   
@@ -92,18 +90,18 @@ public class BigBoard {
       throw new IllegalArgumentException("Index out of bounds");
     }
     SmallBoard currentBoard = Board[_bigRow][_bigCol];
-    if (Turn == Player.X) {
-      Turn = Player.O;
+    if (Turn == Constants.X) {
+      Turn = Constants.O;
     }
-    else if (Turn == Player.O) {
-      Turn = Player.X;
+    else if (Turn == Constants.O) {
+      Turn = Constants.X;
     }
-    if (Turn == Player.NONE) {
+    if (Turn == Constants.NONE) {
       Turn = currentBoard.getSquare2d(_smallRow, _smallCol);
     }
     currentBoard.undo2d(_smallRow,_smallCol);
     Moves--;
-    Wins.move2d(_bigRow, _bigCol, Player.NONE);
+    Wins.move2d(_bigRow, _bigCol, Constants.NONE);
     BigRow = _moveAnywhere ? -1 : _bigRow;
     BigCol = _moveAnywhere ? -1 : _bigCol;
   }
@@ -139,18 +137,18 @@ public class BigBoard {
       for (int _smallRow = 0; _smallRow < 3; _smallRow++) {
         System.out.print(" ");
         for (int _bigCol = 0; _bigCol < 3; _bigCol++) {
-          // X
+          // Constants.X
           switch (Board[_bigRow][_bigCol].getWinner()) {
-            case NONE:
+            case Constants.NONE:
               for (int _smallCol = 0; _smallCol < 3; _smallCol++) {
                 switch (Board[_bigRow][_bigCol].getSquare2d(_smallRow, _smallCol)) {
-                  case X:
+                  case Constants.X:
                     System.out.print("x");
                     break;
-                  case O:
+                  case Constants.O:
                     System.out.print("o");
                     break;
-                  case NONE:
+                  case Constants.NONE:
                     if ((_bigRow == BigRow  &&  _bigCol == BigCol)  ||  (BigRow == -1)) {
                       System.out.print("#");
                     }
@@ -158,7 +156,7 @@ public class BigBoard {
                       System.out.print("-");
                     }
                     break;
-                  case TIE:
+                  case Constants.TIE:
                     System.out.print("/");
                 }
                 if (_smallCol < 2) {
@@ -166,7 +164,7 @@ public class BigBoard {
                 }
               }
               break;
-            case X:
+            case Constants.X:
               switch (_smallRow) {
                 case 0:
                   System.out.print(" \\ / ");
@@ -179,7 +177,7 @@ public class BigBoard {
                   break;
               }
               break;
-            case O:
+            case Constants.O:
               switch (_smallRow) {
                 case 0:
                   System.out.print(" /‾\\ ");
@@ -192,7 +190,7 @@ public class BigBoard {
                   break;
               }
               break;
-            case TIE:
+            case Constants.TIE:
               switch (_smallRow) {
                 case 0:
                   System.out.print("     ");
@@ -218,16 +216,16 @@ public class BigBoard {
       }
     }
     switch (Wins.getWinner()) {
-      case X:
+      case Constants.X:
         System.out.println("X WINS!");
         break;
-      case O:
+      case Constants.O:
         System.out.println("O WINS!");
         break;
-      case TIE:
+      case Constants.TIE:
         System.out.println("IT'S A TIE!");
         break;
-      case NONE:
+      case Constants.NONE:
         break;
     }
   }

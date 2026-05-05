@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Arrays;
 
-import main.SmallBoard.Player;
-
 public class Node {
   private BigBoard state;
   private Stack<Integer> bigSquares;
@@ -20,7 +18,7 @@ public class Node {
     children = new Stack<Node>();
   }
   
-  public void explore(Player _player, boolean _print) {
+  public void explore(int _player, boolean _print) {
     if (state.BigRow == -1) {
       for (int _row = 0; _row < 3; _row++) {
         for (int _col = 0; _col < 3; _col++) {
@@ -48,10 +46,10 @@ public class Node {
     // System.out.println(smallSquares.size());
   }
 
-  public double eval(boolean _print, Player _player) {
+  public double eval(boolean _print, int _player) {
     // Game outcome
     if (state.isFinished()) {
-      Player _winner = state.Wins.getWinner();
+      int _winner = state.Wins.getWinner();
       if (_winner == _player) {
         return 1000000. - state.Moves;
       }
@@ -74,7 +72,7 @@ public class Node {
     int _playerWins = 0;
     int _enemyWins = 0;
     // With an empty big board, use preset values
-    if (state.Wins.getSquareCount(Player.NONE) == 9) {
+    if (state.Wins.getSquareCount(Constants.NONE) == 9) {
       for (int _row = 0; _row < 3; _row++) {
         for (int _col = 0; _col < 3; _col++) {
           if (_row == 1  &&  _col == 1) {
@@ -106,7 +104,7 @@ public class Node {
                                           {2, 4, 6}};
       PATTERN: for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 3; j++) {
-          if (state.Wins.getSquare(_winPatterns[i][j]) == Player.TIE) {
+          if (state.Wins.getSquare(_winPatterns[i][j]) == Constants.TIE) {
             continue PATTERN;
           }
           if (state.Wins.getSquare(_winPatterns[i][j]) == SmallBoard.opposite(_player)) {
@@ -215,9 +213,9 @@ public class Node {
     return _result;
   }
   
-  public double eval2(boolean _print, Player _player) {
+  public double eval2(boolean _print, int _player) {
     if (state.Wins.isFinished()) {
-      Player _winner = state.Wins.getWinner();
+      int _winner = state.Wins.getWinner();
       if (_winner == _player) {
         return 1000000.;
       }
@@ -282,14 +280,14 @@ public class Node {
     return _result;
   }
 
-  public double minimax(int _depth, boolean _isMaximizing, double _alpha, double _beta, Player _player) {
+  public double minimax(int _depth, boolean _isMaximizing, double _alpha, double _beta, int _player) {
     Debug.getInstance().MinimaxCount++;
     if (_depth <= 1  ||  state.isFinished()) {
       Debug.getInstance().EvalCount++;
       switch (_player) {
-        case X:
+        case Constants.X:
           return eval2(false, _player);
-        case O:
+        case Constants.O:
           return eval2(false, _player);
         default:
           return 0;
@@ -341,7 +339,7 @@ public class Node {
     int _bestMoveBigSquare = -1;
     int _bestMoveSmallSquare = -1;
     double _bestMoveEval = Double.NEGATIVE_INFINITY;
-    Player _player = state.Turn;
+    int _player = state.Turn;
     while(!children.empty()) {
       boolean _moveAnywhere = state.BigRow == -1;
       state.move1d(bigSquares.peek(), smallSquares.peek());

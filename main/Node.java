@@ -3,7 +3,6 @@ package main;
 import java.util.Stack;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Arrays;
 
 public class Node {
   private BigBoard state;
@@ -46,6 +45,7 @@ public class Node {
     // System.out.println(smallSquares.size());
   }
 
+  /*
   public double eval(boolean _print, int _player) {
     // Game outcome
     if (state.isFinished()) {
@@ -212,6 +212,7 @@ public class Node {
     // System.out.println();
     return _result;
   }
+    */
   
   public double eval2(boolean _print, int _player) {
     if (state.Wins.isFinished()) {

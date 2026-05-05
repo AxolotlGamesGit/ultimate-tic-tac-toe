@@ -68,26 +68,27 @@ public class Main {
 		    continue;
 		  }
 
-      if (checkToken(token, "eval-o")) {
-		    Node _node = new Node(BigBoard.copy(board));
-				System.out.println(_node.eval(true, Constants.O));
-				board.print();
-		    continue;
-		  }
+			// TODO uncomment
+      // if (checkToken(token, "eval-o")) {
+		  //   Node _node = new Node(BigBoard.copy(board));
+			// 	System.out.println(_node.eval(true, Constants.O));
+			// 	board.print();
+		  //   continue;
+		  // }
 
-      if (checkToken(token, "eval-x")) {
-		    Node _node = new Node(BigBoard.copy(board));
-				System.out.println(_node.eval(true, Constants.X));
-				board.print();
-		    continue;
-		  }
+      // if (checkToken(token, "eval-x")) {
+		  //   Node _node = new Node(BigBoard.copy(board));
+			// 	System.out.println(_node.eval(true, Constants.X));
+			// 	board.print();
+		  //   continue;
+		  // }
 
-			if (checkToken(token, "eval")) {
-		    Node _node = new Node(BigBoard.copy(board));
-				System.out.println(_node.eval(true, board.Turn));
-				board.print();
-		    continue;
-		  }
+			// if (checkToken(token, "eval")) {
+		  //   Node _node = new Node(BigBoard.copy(board));
+			// 	System.out.println(_node.eval(true, board.Turn));
+			// 	board.print();
+		  //   continue;
+		  // }
 
 			if (checkToken(token, "minimax")) {
 		    Node _node = new Node(BigBoard.copy(board));

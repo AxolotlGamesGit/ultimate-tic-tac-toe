@@ -4,19 +4,38 @@ import java.util.ArrayList;
 
 public class SmallBoard {
   private int board;
+  private int lookupsComplete = 0;
 
-  private static final int TABLE_SIZE = 4^9+1;
-  private static final int SMALL_TABLE_SIZE = 3^9+1;
-  private static final int[] WINNERS = new int[TABLE_SIZE];
-  private static final int[] WIN_SQUARE_COUNT = new int[TABLE_SIZE];
-  private static final int[] SMALL_EVALS = new int[SMALL_TABLE_SIZE];
+  private static final int[] WINNERS = new int[4^9];
+  private static final int[] WIN_SQUARE_COUNTS = new int[(4^9)*2];
+  // private static final double[] SMALL_EVALS = new double[3^9];
+
+  static {
+    SmallBoard _board = new SmallBoard(0, 0);
+    for (int i = 0; i < (4^9); i++) {
+      _board.board = i;
+      WINNERS[i] = _board.getWinner();
+    }
+    _board = new SmallBoard(0, 1);
+    for (int i = 0; i < (4^9); i++) {
+      _board.board = i;
+      WIN_SQUARE_COUNTS[i] = _board.getWinSquareCount(Constants.X);
+      WIN_SQUARE_COUNTS[i + 4^9] = _board.getWinSquareCount(Constants.O);
+    }
+  }
 
   public SmallBoard() {
     board = 0;
+    lookupsComplete = 2;
   }
   
   public SmallBoard(int _board) {
     board = _board;
+  }
+  
+  public SmallBoard(int _board, int _lookupsComplete) {
+    board = _board;
+    lookupsComplete = _lookupsComplete;
   }
   
   public static String getString(int _player) {
@@ -96,6 +115,11 @@ public class SmallBoard {
   }
   
   public int getWinner() {
+    if (lookupsComplete >= 1) {
+      if (board < (4^9)) {
+        return WINNERS[board];
+      }
+    }
     int[][] _winPatterns = new int[][] {{0, 1, 2},
                                           {3, 4, 5},
                                           {6, 7, 8},
@@ -160,8 +184,13 @@ public class SmallBoard {
   }
 
   public int getWinSquareCount(int _player) {
-    if (isFinished()) {
+    if (isFinished()  ||  _player == Constants.NONE  ||  _player == Constants.TIE) {
       return 0;
+    }
+    if (lookupsComplete >= 2) {
+      if (board < (4^9)) {
+        return WIN_SQUARE_COUNTS[board + ((_player-1)*(4^9))];
+      }
     }
     int _result = 0;
     for (int _row = 0; _row < 3; _row++) {
@@ -199,25 +228,25 @@ public class SmallBoard {
     return _result;
   }
 
-  public double eval(int _player) {
-    double _result = 0.;
-    int _enemy = opposite(_player);
-    int _playerWinSquares = getWinSquareCount(_player);
-    int _enemyWinSquares = getWinSquareCount(_enemy);
-    _result += 1. * _playerWinSquares;
-    _result -= 1. * _enemyWinSquares;
-    for (int _square = 0; _square < 9; _square++) {
-      if (getSquare(_square) == Constants.NONE) {
-        move(_square,_player);
-        _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
-        undo(_square);
-        move(_square,_enemy);
-        _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
-        undo(_square);
-      }
-    }
-    return _result;
-  }
+  // public double eval(int _player) {
+  //   double _result = 0.;
+  //   int _enemy = opposite(_player);
+  //   int _playerWinSquares = getWinSquareCount(_player);
+  //   int _enemyWinSquares = getWinSquareCount(_enemy);
+  //   _result += 1. * _playerWinSquares;
+  //   _result -= 1. * _enemyWinSquares;
+  //   for (int _square = 0; _square < 9; _square++) {
+  //     if (getSquare(_square) == Constants.NONE) {
+  //       move(_square,_player);
+  //       _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
+  //       undo(_square);
+  //       move(_square,_enemy);
+  //       _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
+  //       undo(_square);
+  //     }
+  //   }
+  //   return _result;
+  // }
   
   public void print() {
     for (int _row = 0; _row < 3; _row++) {

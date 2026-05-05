@@ -16,7 +16,7 @@ public class Main {
 		Stack<Integer> smallSquares = new Stack<Integer>();
 		Stack<Boolean> moveAnywhere = new Stack<Boolean>();
 		String token = "";
-		int xDepth = 6;
+		int xDepth = 7;
 		int oDepth = 7;
 		while (!checkToken(token, "close")) {
 		  int _depth = 6;

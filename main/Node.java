@@ -45,7 +45,6 @@ public class Node {
     // System.out.println(smallSquares.size());
   }
 
-  /*
   public double eval(boolean _print, int _player) {
     // Game outcome
     if (state.isFinished()) {
@@ -64,107 +63,7 @@ public class Node {
     double _result = 0;
     
     // Calculate the multiplier for each big square
-    double[][] _squareMults = new double[3][3];
-    for (int _row = 0; _row < 3; _row++) {
-      Arrays.fill(_squareMults[_row],0.);
-    }
-    
-    int _playerWins = 0;
-    int _enemyWins = 0;
-    // With an empty big board, use preset values
-    if (state.Wins.getSquareCount(Constants.NONE) == 9) {
-      for (int _row = 0; _row < 3; _row++) {
-        for (int _col = 0; _col < 3; _col++) {
-          if (_row == 1  &&  _col == 1) {
-            _squareMults[_row][_col] = 1.6;
-          }
-          else if (Math.abs(_row - _col) != 1) {
-            _squareMults[_row][_col] = 1.3;
-          }
-          else {
-            _squareMults[_row][_col] = 1.;
-          }
-        }
-      }
-    }
-    // If there is something on the big board, use overcomplicated method
-    else {
-      // Count the % of possible 3 in a rows each big square is in
-      int[] _playerPotentialWinSquares = new int[9];
-      Arrays.fill(_playerPotentialWinSquares,0);
-      int[] _enemyPotentialWinSquares = new int[9];
-      Arrays.fill(_enemyPotentialWinSquares,0);
-      int[][] _winPatterns = new int[][] {{0, 1, 2},
-                                          {3, 4, 5},
-                                          {6, 7, 8},
-                                          {0, 3, 6},
-                                          {1, 4, 7},
-                                          {2, 5, 8},
-                                          {0, 4, 8},
-                                          {2, 4, 6}};
-      PATTERN: for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 3; j++) {
-          if (state.Wins.getSquare(_winPatterns[i][j]) == Constants.TIE) {
-            continue PATTERN;
-          }
-          if (state.Wins.getSquare(_winPatterns[i][j]) == SmallBoard.opposite(_player)) {
-            break;
-          }
-          if (j == 2) {
-            _playerWins ++;
-            _playerPotentialWinSquares[_winPatterns[i][0]]++;
-            _playerPotentialWinSquares[_winPatterns[i][1]]++;
-            _playerPotentialWinSquares[_winPatterns[i][2]]++;
-          }
-        }
-        for (int j = 0; j < 3; j++) {
-          if (state.Wins.getSquare(_winPatterns[i][j]) == _player) {
-            break;
-          }
-          if (j == 2) {
-            _enemyWins ++;
-            _enemyPotentialWinSquares[_winPatterns[i][0]]++;
-            _enemyPotentialWinSquares[_winPatterns[i][1]]++;
-            _enemyPotentialWinSquares[_winPatterns[i][2]]++;
-          }
-        }
-      }
-  
-      // Calculate the multiplier for each big square based on % of possible wins, # of win squares created and if it wins
-      int _playerWinSquares = state.Wins.getWinSquareCount(_player);
-      int _enemyWinSquares = state.Wins.getWinSquareCount(SmallBoard.opposite(_player));
-      for (int _row = 0; _row < 3; _row++) {
-        for (int _col = 0; _col < 3; _col++) {
-          if (state.Board[_row][_col].isFinished()) {
-            _squareMults[_row][_col] = -1.;
-            continue;
-          }
-          if (state.Wins.wouldWin(_row,_col,_player)) {
-            _squareMults[_row][_col] += 2.;
-          }
-          if (state.Wins.wouldWin(_row,_col,SmallBoard.opposite(_player))) {
-            _squareMults[_row][_col] += 2.;
-          }
-          if (_squareMults[_row][_col] == 0.) {
-            state.Wins.move2d(_row,_col,_player);
-            _squareMults[_row][_col] += 0.5 * (state.Wins.getWinSquareCount(_player) - _playerWinSquares);
-            state.Wins.undo2d(_row,_col);
-            state.Wins.move2d(_row,_col,SmallBoard.opposite(_player));
-            _squareMults[_row][_col] += 0.5 * (state.Wins.getWinSquareCount(SmallBoard.opposite(_player)) - _enemyWinSquares);
-            state.Wins.undo2d(_row,_col);
-          }
-          if (_print) {
-            System.out.println(_row + " " + _col + " " + _playerWins + " " + _playerPotentialWinSquares[_row*3+_col] + " " + _enemyWins + " " + _enemyPotentialWinSquares[_row*3+_col]);
-          }
-          if (_playerWins != 0) {
-            _squareMults[_row][_col] += 2. * (double)(_playerPotentialWinSquares[_row*3+_col]) / ((double)_playerWins);
-          }
-          if (_enemyWins != 0) {
-            _squareMults[_row][_col] += 2. * (double)(_enemyPotentialWinSquares[_row*3+_col]) / ((double)_enemyWins);
-          }
-        }
-      }
-    }
+    double[][] _squareMults = state.Wins.getSquareMults(_player);
 
     // Calculate the value for each small board using the big square multipliers
     for (int _bigRow = 0; _bigRow < 3; _bigRow++) {
@@ -172,13 +71,7 @@ public class Node {
         if (_squareMults[_bigRow][_bigCol] == -1.) {
           continue;
         }
-        double _squareValue = 1. * state.Board[_bigRow][_bigCol].eval(_player);
-        // SmallBoard _currentBoard = state.Board[_bigRow][_bigCol];
-        // double _squareValue = 0.;
-        // _squareValue += _currentBoard.getSquareCount(_player);
-        // _squareValue -= _currentBoard.getSquareCount(SmallBoard.opposite(_player));
-        // _squareValue += _currentBoard.getWinSquareCount(_player) * 3;
-        // _squareValue -= _currentBoard.getWinSquareCount(SmallBoard.opposite(_player)) * 3;
+        double _squareValue = state.Board[_bigRow][_bigCol].smallEval(_player);
         _result += _squareValue * _squareMults[_bigRow][_bigCol];
 
         if (_print) {
@@ -192,7 +85,7 @@ public class Node {
     }
 
     // Calculate the value of the overall board state
-    double _boardValue = 20 * state.Wins.eval(_player);
+    double _boardValue = state.Wins.bigEval(_player);
     if (state.BigRow == -1) {
       if (state.Turn == _player) {
         _boardValue += 10;
@@ -212,7 +105,6 @@ public class Node {
     // System.out.println();
     return _result;
   }
-    */
   
   public double eval2(boolean _print, int _player) {
     if (state.Wins.isFinished()) {
@@ -287,7 +179,7 @@ public class Node {
       Debug.getInstance().EvalCount++;
       switch (_player) {
         case Constants.X:
-          return eval2(false, _player);
+          return eval(false, _player);
         case Constants.O:
           return eval2(false, _player);
         default:

@@ -1,32 +1,45 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SmallBoard {
   private int board;
   private int lookupsComplete = 0;
 
-  private static final int[] WINNERS = new int[4^9];
-  private static final int[] WIN_SQUARE_COUNTS = new int[(4^9)*2];
-  // private static final double[] SMALL_EVALS = new double[3^9];
+  private static final int[] WINNERS = new int[1 << 18];
+  private static final int[] WIN_SQUARE_COUNTS = new int[1 << 19];
+  private static final double[] SMALL_EVALS = new double[1 << 19];
+  private static final double[] BIG_EVALS = new double[1 << 19];
+  private static final double[][][] BIG_SQUARE_MULTS = new double[1 << 19][3][3];
 
   static {
     SmallBoard _board = new SmallBoard(0, 0);
-    for (int i = 0; i < (4^9); i++) {
+    for (int i = 0; i < (1 << 18); i++) {
       _board.board = i;
       WINNERS[i] = _board.getWinner();
     }
     _board = new SmallBoard(0, 1);
-    for (int i = 0; i < (4^9); i++) {
+    for (int i = 0; i < (1 << 18); i++) {
       _board.board = i;
       WIN_SQUARE_COUNTS[i] = _board.getWinSquareCount(Constants.X);
-      WIN_SQUARE_COUNTS[i + 4^9] = _board.getWinSquareCount(Constants.O);
+      WIN_SQUARE_COUNTS[i + (1 << 18)] = _board.getWinSquareCount(Constants.O);
+    }
+    _board = new SmallBoard(0, 2);
+    for (int i = 0; i < (1 << 18); i++) {
+      _board.board = i;
+      SMALL_EVALS[i] = _board.smallEval(Constants.X);
+      SMALL_EVALS[i + (1 << 18)] = _board.smallEval(Constants.O);
+      BIG_EVALS[i] = _board.bigEval(Constants.X);
+      BIG_EVALS[i + (1 << 18)] = _board.bigEval(Constants.O);
+      BIG_SQUARE_MULTS[i] = _board.getSquareMults(Constants.X);
+      BIG_SQUARE_MULTS[i + (1 << 18)] = _board.getSquareMults(Constants.O);
     }
   }
 
   public SmallBoard() {
     board = 0;
-    lookupsComplete = 2;
+    lookupsComplete = 5;
   }
   
   public SmallBoard(int _board) {
@@ -116,7 +129,7 @@ public class SmallBoard {
   
   public int getWinner() {
     if (lookupsComplete >= 1) {
-      if (board < (4^9)) {
+      if (board < (1 << 18)) {
         return WINNERS[board];
       }
     }
@@ -188,8 +201,8 @@ public class SmallBoard {
       return 0;
     }
     if (lookupsComplete >= 2) {
-      if (board < (4^9)) {
-        return WIN_SQUARE_COUNTS[board + ((_player-1)*(4^9))];
+      if (board < (1 << 18)) {
+        return WIN_SQUARE_COUNTS[board + ((_player-1)*(1 << 18))];
       }
     }
     int _result = 0;
@@ -228,25 +241,155 @@ public class SmallBoard {
     return _result;
   }
 
-  // public double eval(int _player) {
-  //   double _result = 0.;
-  //   int _enemy = opposite(_player);
-  //   int _playerWinSquares = getWinSquareCount(_player);
-  //   int _enemyWinSquares = getWinSquareCount(_enemy);
-  //   _result += 1. * _playerWinSquares;
-  //   _result -= 1. * _enemyWinSquares;
-  //   for (int _square = 0; _square < 9; _square++) {
-  //     if (getSquare(_square) == Constants.NONE) {
-  //       move(_square,_player);
-  //       _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
-  //       undo(_square);
-  //       move(_square,_enemy);
-  //       _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
-  //       undo(_square);
-  //     }
-  //   }
-  //   return _result;
-  // }
+  public double smallEval(int _player) {
+    if (lookupsComplete >= 3) {
+      if (board < (1 << 18)) {
+        return SMALL_EVALS[board + ((_player-1)*(1 << 18))];
+      }
+    }
+
+    double _result = 0.;
+    int _enemy = opposite(_player);
+    int _playerWinSquares = getWinSquareCount(_player);
+    int _enemyWinSquares = getWinSquareCount(_enemy);
+    _result += 1. * _playerWinSquares;
+    _result -= 1. * _enemyWinSquares;
+    for (int _square = 0; _square < 9; _square++) {
+      if (getSquare(_square) == Constants.NONE) {
+        move(_square,_player);
+        _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
+        undo(_square);
+        move(_square,_enemy);
+        _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
+        undo(_square);
+      }
+    }
+    return _result;
+  }
+
+  public double bigEval(int _player) {
+    if (lookupsComplete >= 4) {
+      if (board < (1 << 18)) {
+        return BIG_EVALS[board + ((_player-1)*(1 << 18))];
+      }
+    }
+
+    double _result = 0.;
+    int _enemy = opposite(_player);
+    int _playerWinSquares = getWinSquareCount(_player);
+    int _enemyWinSquares = getWinSquareCount(_enemy);
+    _result += 20. * _playerWinSquares;
+    _result -= 20. * _enemyWinSquares;
+    for (int _square = 0; _square < 9; _square++) {
+      if (getSquare(_square) == Constants.NONE) {
+        move(_square,_player);
+        _result += 2. * (getWinSquareCount(_player) - _playerWinSquares);
+        undo(_square);
+        move(_square,_enemy);
+        _result -= 2. * (getWinSquareCount(_enemy) - _enemyWinSquares);
+        undo(_square);
+      }
+    }
+    return _result;
+  }
+
+  public double[][] getSquareMults(int _player) {
+    if (lookupsComplete >= 5) {
+      if (board < (1 << 18)) {
+        return BIG_SQUARE_MULTS[board + ((_player-1)*(1 << 18))];
+      }
+    }
+
+    double[][] _result = new double[3][3];
+    for (int _row = 0; _row < 3; _row++) {
+      Arrays.fill(_result[_row],0.);
+    }
+    
+    // With an empty big board, use preset values
+    if (getSquareCount(Constants.NONE) == 9) {
+      for (int _row = 0; _row < 3; _row++) {
+        for (int _col = 0; _col < 3; _col++) {
+          if (_row == 1  &&  _col == 1) {
+            _result[_row][_col] = 1.6;
+          }
+          else if (Math.abs(_row - _col) != 1) {
+            _result[_row][_col] = 1.3;
+          }
+          else {
+            _result[_row][_col] = 1.;
+          }
+        }
+      }
+    }
+    // If there is something on the big board, use overcomplicated method
+    else {
+      // Count the % of possible 3 in a rows each big square is in
+      int[] _playerPotentialWinSquares = new int[9];
+      Arrays.fill(_playerPotentialWinSquares,0);
+      int[] _enemyPotentialWinSquares = new int[9];
+      Arrays.fill(_enemyPotentialWinSquares,0);
+      int[][] _winPatterns = new int[][] {{0, 1, 2},
+                                          {3, 4, 5},
+                                          {6, 7, 8},
+                                          {0, 3, 6},
+                                          {1, 4, 7},
+                                          {2, 5, 8},
+                                          {0, 4, 8},
+                                          {2, 4, 6}};
+      PATTERN: for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (getSquare(_winPatterns[i][j]) == Constants.TIE) {
+            continue PATTERN;
+          }
+          if (getSquare(_winPatterns[i][j]) == SmallBoard.opposite(_player)) {
+            break;
+          }
+          if (j == 2) {
+            _playerPotentialWinSquares[_winPatterns[i][0]]++;
+            _playerPotentialWinSquares[_winPatterns[i][1]]++;
+            _playerPotentialWinSquares[_winPatterns[i][2]]++;
+          }
+        }
+        for (int j = 0; j < 3; j++) {
+          if (getSquare(_winPatterns[i][j]) == _player) {
+            break;
+          }
+          if (j == 2) {
+            _enemyPotentialWinSquares[_winPatterns[i][0]]++;
+            _enemyPotentialWinSquares[_winPatterns[i][1]]++;
+            _enemyPotentialWinSquares[_winPatterns[i][2]]++;
+          }
+        }
+      }
+  
+      // Calculate the multiplier for each big square based on % of possible wins, # of win squares created and if it wins
+      int _playerWinSquares = getWinSquareCount(_player);
+      int _enemyWinSquares = getWinSquareCount(SmallBoard.opposite(_player));
+      for (int _row = 0; _row < 3; _row++) {
+        for (int _col = 0; _col < 3; _col++) {
+          if (getSquare2d(_row,_col) != Constants.NONE) {
+            _result[_row][_col] = -1.;
+            continue;
+          }
+          if (wouldWin(_row,_col,_player)) {
+            _result[_row][_col] += 2.;
+          }
+          if (wouldWin(_row,_col,SmallBoard.opposite(_player))) {
+            _result[_row][_col] += 2.;
+          }
+          if (_result[_row][_col] == 0.) {
+            setSquare2d(_row, _col, _player);
+            _result[_row][_col] += 0.5 * (getWinSquareCount(_player) - _playerWinSquares);
+            setSquare2d(_row, _col, opposite(_player));
+            _result[_row][_col] += 0.5 * (getWinSquareCount(SmallBoard.opposite(_player)) - _enemyWinSquares);
+            setSquare2d(_row, _col, Constants.NONE);
+          }
+        }
+      }
+    }
+
+    return _result;
+  }
   
   public void print() {
     for (int _row = 0; _row < 3; _row++) {

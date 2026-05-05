@@ -1,7 +1,6 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class SmallBoard {
   public enum Player {
@@ -15,19 +14,30 @@ public class SmallBoard {
     Player(int _value) {
       this.Value = _value;
     }
-  }
-  
-  private Player[][] Board;
-
-  public SmallBoard() {
-    Board = new Player[3][3];
-    for (int _row = 0; _row < 3; _row++) {
-      Arrays.fill(Board[_row],Player.NONE);
+    
+    public static Player fromInt(int _value) {
+      switch (_value) {
+        case 0:
+          return NONE;
+        case 1:
+          return X;
+        case 2:
+          return O;
+        case 3:
+          return TIE;
+      }
+      return NONE;
     }
   }
   
-  public SmallBoard(Player[][] _board) {
-    Board = _board;
+  private int board;
+
+  public SmallBoard() {
+    board = 0;
+  }
+  
+  public SmallBoard(int _board) {
+    board = _board;
   }
   
   public static String getString(Player _player) {
@@ -59,53 +69,69 @@ public class SmallBoard {
   }
 
   public Player getSquare(int _square) {
-    return Board[_square/3][_square%3];
+    return Player.fromInt((board >> 2*_square)&3);
   }
 
   public Player getSquare2d(int _row, int _col) {
-    return Board[_row][_col];
+    return getSquare(_row*3+_col);
   }
   
-  public void move(int _row, int _col, Player _player) throws IllegalArgumentException {
-    if (_row <= -1  ||  _row >= 3  ||
-            _col <= -1  ||  _col >= 3) {
+  public void setSquare(int _square, Player _player) {
+    board = (board & (~(3<<2*_square))) | (_player.Value<<2*_square);
+  }
+
+  public void setSquare2d(int _row, int _col, Player _player) {
+    setSquare(_row*3+_col, _player);
+  }
+  
+  public void move(int _square, Player _player) throws IllegalArgumentException {
+    if (_square <= -1  ||  _square >= 9) {
       throw new IndexOutOfBoundsException();
     }
-    if (Board[_row][_col] == Player.NONE  ||  _player == Player.NONE) {
-      Board[_row][_col] = _player;
+    if (getSquare(_square) == Player.NONE  ||  _player == Player.NONE) {
+      setSquare(_square, _player);
     }
     else {
-      throw new IllegalArgumentException("Square occupied");
+      throw new IllegalArgumentException("Square occupied: " + _square);
     }
   }
   
-  public void undo(int _row, int _col) throws IllegalArgumentException {
-    if (_row <= -1  ||  _row >= 3  ||
-            _col <= -1  ||  _col >= 3) {
+  public void move2d(int _row, int _col, Player _player) throws IllegalArgumentException {
+    move(_row*3+_col, _player);
+  }
+  
+  public void undo(int _square) throws IllegalArgumentException {
+    if (_square <= -1  ||  _square >= 9) {
       throw new IndexOutOfBoundsException();
     }
-    if (Board[_row][_col] != Player.NONE) {
-      Board[_row][_col] = Player.NONE;
+    if (getSquare(_square) != Player.NONE) {
+      setSquare(_square, Player.NONE);
     }
     else {
-      throw new IllegalArgumentException("Can't undo: no player on that square " + _row + " " + _col);
+      throw new IllegalArgumentException("Can't undo: no player on that square " + _square);
     }
+  }
+  
+  public void undo2d(int _row, int _col) throws IllegalArgumentException {
+    undo(_row*3+_col);
   }
   
   public Player getWinner() {
-    for (int i = 0; i < 3; i++) {
-      if (Board[i][0] != Player.NONE  &&  Board[i][0] != Player.TIE  &&  Board[i][0] == Board[i][1]  &&  Board[i][1] == Board[i][2]) {
-        return Board[i][0];
+    int[][] _winPatterns = new int[][] {{0, 1, 2},
+                                          {3, 4, 5},
+                                          {6, 7, 8},
+                                          {0, 3, 6},
+                                          {1, 4, 7},
+                                          {2, 5, 8},
+                                          {0, 4, 8},
+                                          {2, 4, 6}};
+    for (int i = 0; i < 8; i++) {
+      if (getSquare(_winPatterns[i][0]) != Player.NONE  &&  
+          getSquare(_winPatterns[i][0]) != Player.TIE  &&
+          getSquare(_winPatterns[i][0]) == getSquare(_winPatterns[i][1])  &&
+          getSquare(_winPatterns[i][1]) == getSquare(_winPatterns[i][2])) {
+        return getSquare(_winPatterns[i][0]);
       }
-      if (Board[0][i] != Player.NONE  &&  Board[0][i] != Player.TIE  &&  Board[0][i] == Board[1][i]  &&  Board[1][i] == Board[2][i]) {
-        return Board[0][i];
-      }
-    }
-    if (Board[1][1] != Player.NONE  &&  Board[1][1] != Player.TIE  &&  Board[0][0] == Board[1][1]  &&  Board[1][1] == Board[2][2]) {
-      return Board[1][1];
-    }
-    if (Board[1][1] != Player.NONE  &&  Board[1][1] != Player.TIE  &&  Board[0][2] == Board[1][1]  &&  Board[1][1] == Board[2][0]) {
-      return Board[1][1];
     }
     if (isFull()) {
       return Player.TIE;
@@ -114,11 +140,9 @@ public class SmallBoard {
   }
   
   public boolean isFull() {
-    for (int _row = 0; _row < 3; _row++) {
-      for (int _col = 0; _col < 3; _col++) {
-        if (Board[_row][_col] == Player.NONE) {
-          return false;
-        }
+    for (int i = 0; i < 9; i++) {
+      if (getSquare(i) == Player.NONE) {
+        return false;
       }
     }
     return true;
@@ -129,29 +153,27 @@ public class SmallBoard {
   }
 
   public boolean wouldWin(int _row, int _col, Player _player) {
-    if (Board[_row][_col] != Player.NONE) {
+    if (getSquare2d(_row,_col) != Player.NONE) {
       return false;
     }
     if (isFinished()) {
       return false;
     }
     boolean _result = false;
-    move(_row, _col, _player);
+    setSquare2d(_row, _col, _player);
     if (getWinner() != Player.NONE  &&  getWinner() != Player.TIE) {
       _result = true;
     }
-    undo(_row, _col);
+    setSquare2d(_row, _col, Player.NONE);
 
     return _result;
   }
 
   public int getSquareCount(Player _player) {
     int _result = 0;
-    for (int _row = 0; _row < 3; _row++) {
-      for (int _col = 0; _col < 3; _col++) {
-        if (Board[_row][_col] == _player) {
-          _result++;
-        }
+    for (int i = 0; i < 9; i++) {
+      if (getSquare(i) == _player) {
+        _result++;
       }
     }
 
@@ -165,7 +187,7 @@ public class SmallBoard {
     int _result = 0;
     for (int _row = 0; _row < 3; _row++) {
       for (int _col = 0; _col < 3; _col++) {
-        if (Board[_row][_col] == Player.NONE) {
+        if (getSquare2d(_row,_col) == Player.NONE) {
           if (wouldWin(_row, _col, _player)) {
             _result++;
           }
@@ -177,11 +199,9 @@ public class SmallBoard {
 
   public ArrayList<Integer> getOrderedMoves(Player _player) {
     ArrayList<Integer> _result = new ArrayList<Integer>();
-    for (int _row = 0; _row < 3; _row++) {
-      for (int _col = 0; _col < 3; _col++) {
-        if (Board[_row][_col] == Player.NONE) {
-          _result.add(_row*3 + _col);
-        }
+    for (int i = 0; i < 9; i++) {
+      if (getSquare(i) == Player.NONE) {
+        _result.add(i);
       }
     }
 
@@ -207,25 +227,23 @@ public class SmallBoard {
     int _enemyWinSquares = getWinSquareCount(_enemy);
     _result += 1. * _playerWinSquares;
     _result -= 1. * _enemyWinSquares;
-    // for (int _row = 0; _row < 3; _row++) {
-    //   for (int _col = 0; _col < 3; _col++) {
-    //     if (Board[_row][_col] == Player.NONE) {
-    //       move(_row,_col,_player);
-    //       _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
-    //       undo(_row,_col);
-    //       move(_row,_col,_enemy);
-    //       _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
-    //       undo(_row,_col);
-    //     }
-    //   }
-    // }
+    for (int _square = 0; _square < 9; _square++) {
+      if (getSquare(_square) == Player.NONE) {
+        move(_square,_player);
+        _result += 0.1 * (getWinSquareCount(_player) - _playerWinSquares);
+        undo(_square);
+        move(_square,_enemy);
+        _result -= 0.1 * (getWinSquareCount(_enemy) - _enemyWinSquares);
+        undo(_square);
+      }
+    }
     return _result;
   }
   
   public void print() {
     for (int _row = 0; _row < 3; _row++) {
       for (int _col = 0; _col < 3; _col++) {
-          System.out.print(getString(Board[_row][_col]) + " ");
+        System.out.print(getString(getSquare2d(_row,_col)) + " ");
       }
       System.out.println("");
     }

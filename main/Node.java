@@ -148,12 +148,12 @@ public class Node {
             _squareMults[_row][_col] += 2.;
           }
           if (_squareMults[_row][_col] == 0.) {
-            state.Wins.move(_row,_col,_player);
+            state.Wins.move2d(_row,_col,_player);
             _squareMults[_row][_col] += 0.5 * (state.Wins.getWinSquareCount(_player) - _playerWinSquares);
-            state.Wins.undo(_row,_col);
-            state.Wins.move(_row,_col,SmallBoard.opposite(_player));
+            state.Wins.undo2d(_row,_col);
+            state.Wins.move2d(_row,_col,SmallBoard.opposite(_player));
             _squareMults[_row][_col] += 0.5 * (state.Wins.getWinSquareCount(SmallBoard.opposite(_player)) - _enemyWinSquares);
-            state.Wins.undo(_row,_col);
+            state.Wins.undo2d(_row,_col);
           }
           if (_print) {
             System.out.println(_row + " " + _col + " " + _playerWins + " " + _playerPotentialWinSquares[_row*3+_col] + " " + _enemyWins + " " + _enemyPotentialWinSquares[_row*3+_col]);

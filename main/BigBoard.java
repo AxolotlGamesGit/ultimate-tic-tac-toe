@@ -32,7 +32,7 @@ public class BigBoard {
     Wins = new SmallBoard();
     for (int _row = 0; _row < 3; _row++) {
       for (int _col = 0; _col < 3; _col++) {
-        Wins.move(_row,_col,Board[_row][_col].getWinner());
+        Wins.move2d(_row,_col,Board[_row][_col].getWinner());
       }
     }
     Moves = _moves;
@@ -62,10 +62,10 @@ public class BigBoard {
       throw new IllegalArgumentException("Index out of bounds");
     }
     SmallBoard currentBoard = Board[_bigRow][_bigCol];
-    currentBoard.move(_smallRow,_smallCol,Turn);
+    currentBoard.move2d(_smallRow,_smallCol,Turn);
     Moves++;
     if (currentBoard.getWinner() != Player.NONE) {
-      Wins.move(_bigRow,_bigCol,currentBoard.getWinner());
+      Wins.move2d(_bigRow,_bigCol,currentBoard.getWinner());
     }
     BigRow = _smallRow;
     BigCol = _smallCol;
@@ -101,9 +101,9 @@ public class BigBoard {
     if (Turn == Player.NONE) {
       Turn = currentBoard.getSquare2d(_smallRow, _smallCol);
     }
-    currentBoard.undo(_smallRow,_smallCol);
+    currentBoard.undo2d(_smallRow,_smallCol);
     Moves--;
-    Wins.move(_bigRow, _bigCol, Player.NONE);
+    Wins.move2d(_bigRow, _bigCol, Player.NONE);
     BigRow = _moveAnywhere ? -1 : _bigRow;
     BigCol = _moveAnywhere ? -1 : _bigCol;
   }

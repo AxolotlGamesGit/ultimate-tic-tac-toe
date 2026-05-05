@@ -216,13 +216,13 @@ public class Node {
   }
   
   public double eval2(boolean _print, Player _player) {
-    if (state.isFinished()) {
+    if (state.Wins.isFinished()) {
       Player _winner = state.Wins.getWinner();
       if (_winner == _player) {
-        return 1000000. - state.Moves;
+        return 1000000.;
       }
       else if (_winner == SmallBoard.opposite(_player)) {
-        return -1000000. + state.Moves;
+        return -1000000.;
       }
       else {
         return 10.;
@@ -241,16 +241,16 @@ public class Node {
         _squareValue -= _currentBoard.getWinSquareCount(SmallBoard.opposite(_player)) * 3;
 
         if (_bigRow == 1  &&  _bigCol == 1) {
-          _squareMult = 1.4;
+          _squareMult = 1.5;
         }
-        if (Math.abs(_bigRow - _bigCol) != 1) {
-          _squareMult = 1.2;
+        if (Math.max(_bigRow, _bigCol) == 2  &&  Math.min(_bigRow, _bigCol) == 0) {
+          _squareMult = 1.25;
         }
         if (state.Wins.wouldWin(_bigRow, _bigCol, _player)) {
-          _squareMult += 1;
+          _squareMult *= 2;
         }
         if (state.Wins.wouldWin(_bigRow, _bigCol, SmallBoard.opposite(_player))) {
-          _squareMult += 1;
+          _squareMult *= 2;
         }
 
         _result += _squareValue * _squareMult;
@@ -290,7 +290,7 @@ public class Node {
         case X:
           return eval2(false, _player);
         case O:
-          return eval(false, _player);
+          return eval2(false, _player);
         default:
           return 0;
       }

@@ -106,7 +106,7 @@ public class Node {
     return _result;
   }
   
-  public double eval2(boolean _print, int _player) {
+  public double oldEval(boolean _print, int _player) {
     if (state.Wins.isFinished()) {
       int _winner = state.Wins.getWinner();
       if (_winner == _player) {
@@ -181,7 +181,7 @@ public class Node {
         case Constants.X:
           return eval(false, _player);
         case Constants.O:
-          return eval2(false, _player);
+          return eval(false, _player);
         default:
           return 0;
       }

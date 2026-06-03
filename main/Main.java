@@ -16,10 +16,10 @@ public class Main {
 		Stack<Integer> smallSquares = new Stack<Integer>();
 		Stack<Boolean> moveAnywhere = new Stack<Boolean>();
 		String token = "";
-		int xDepth = 7;
-		int oDepth = 7;
+		int xDepth = 10;
+		int oDepth = -1;
 		while (!checkToken(token, "close")) {
-		  int _depth = 6;
+		  int _depth = 10;
 		  if (board.Moves > 90) {
 		    xDepth = -1;
 		    oDepth = -1;
@@ -109,15 +109,15 @@ public class Main {
 		  }
 		  
 			if (checkToken(token, "move")) {
-        // if (board.Moves == 0) {
-				// 	System.out.println("Pre-programmed first move");
-				// 	board.move(1,1,2,2);
-				// 	bigSquares.push(4);
-				// 	smallSquares.push(8);
-				// 	moveAnywhere.push(false);
-				// 	board.print();
-				// 	continue;
-				// }
+        if (board.Moves == 0) {
+					System.out.println("Pre-programmed first move");
+					board.move(1,1,1,1);
+					bigSquares.push(4);
+					smallSquares.push(8);
+					moveAnywhere.push(false);
+					board.print();
+					continue;
+				}
 		    Node _node = new Node(BigBoard.copy(board));
 				switch (token) {
 					case "move-small":
